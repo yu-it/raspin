@@ -1,5 +1,5 @@
 from raspin.logging_service_skelton import logging_service_skelton as skelton
-import datetime.datetime as datetime
+from datetime import datetime 
 
 
 class timer_service(skelton):
