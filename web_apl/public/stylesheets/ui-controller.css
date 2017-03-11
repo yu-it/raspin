@@ -1,0 +1,43 @@
+button.direction{
+ color: #000000;
+ background-color: #f8dce0;
+ background-size:70px 70px;
+ width:70px;
+ height:70px;
+}
+
+button.left{
+ position:relative; top:70px; left:0px;
+ 
+ background-image: url("../images/allow_l.png");
+}
+
+button.right{
+ position:relative; top:70px; left:70px;
+ background-image: url("../images/allow_r.png");
+}
+
+button.up{
+ position:relative; top:-70px; left:70px;
+ background-image: url("../images/allow_u.png");
+}
+
+button.down{
+ position:relative; top:0px; left:0px;
+ background-image: url("../images/allow_d.png");
+}
+button.inp{
+ background-color: #00FF00;
+}
+button.com{
+ background-color: #0000FF;
+}
+
+div.direction{
+  top:0px; left:0px;
+}
+
+div.pv_base{
+    border-style:solid;
+}
+

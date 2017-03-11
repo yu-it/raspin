@@ -1,0 +1,15 @@
+doctype html
+html
+  head
+   style
+    include ../public/stylesheets/raspin-main.css
+
+  body
+   h1= title
+   p Welcome to #{title}
+   script(src="javascripts/jquery-3.1.1.js")
+   script(src="javascripts/raspin-main.client.js")
+   // - div(class='div-class', (click)='play()')
+   div.field_controller
+   div.field_data
+   div#console_div
