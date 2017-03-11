@@ -14,7 +14,7 @@ var ui_data = require('./routes/ui-data');
 var app = express();
 
 //initialize mongo-db
-const execSync = require('child_process').execSync;
+const execSync = require('child_process').exec;
 const result =  execSync('mongo ./private-logics/stored_proc.js');
 console.log(result);
 
