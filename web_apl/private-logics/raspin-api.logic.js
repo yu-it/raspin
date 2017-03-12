@@ -20,7 +20,7 @@ module.exports.SendControllMessage = function (pvid, message, args, timeout_seco
   
   // Connection URL
   var url = 'mongodb://localhost:27017/test';
-  log("★★★send control start★★★")
+  log("★★★send control start★★★:" + pvid)
   // Use connect method to connect to the server
   MongoClient.connect(url, function (err, db) {
       SendControllMessageMainLogic(db, pvid, message, args, timeout_second,res)
@@ -38,7 +38,7 @@ function SendControllMessageMainLogic(db, pvid, message, args, timeout_second,re
 }
 
 function SendControllMessageCheckPv(db, pvid, message, args, timeout_second,res, scmWaitAcknowledge, scmReturnModifyingMessage,scmProcessControl, scmProcessData) {
-    log("★★★connected★★★")
+    log("★★★connected★★★:" + pvid)
     
     var time_remain = 0
     if (timeout_second == 0) {
@@ -61,19 +61,20 @@ function SendControllMessageWaitAcknowledge(db, pvid, message, args, timeout_sec
     var target_queue = pvid + "_queue"
     var target_queue_accepted = pvid + "_accepted"
 
-    log("★★★message inserted★★★")
+    log("★★★message inserted★★★:" + pvid)
     if (dat == null) {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
+        log("★★★not found in controller_privider★★★:" + pvid)
+        res.writeHead(500, { 'Content-Type': 'application/json' });
 
-            res.end(JSON.stringify({"ret":-1, "pvid":pvid}));
-            db.close()
+        res.end(JSON.stringify({"ret":-1, "pvid":pvid}));
+        db.close()
     }
     db.collection(target_queue).insertOne({"_id": req_id, "message":message, "arg":args, "init": false})
     var await_cursor_src = db.collection(target_queue_accepted).find({"_id":req_id}, {tailable:true,await_data:true});
     var await_cursor = await_cursor_src.stream();
     await_cursor_src.processed = 0
     await_cursor.on('data', function(ack_data) {
-        log("★★★accepted★★★")
+        log("★★★accepted★★★:" + pvid)
         res.writeHead(200, { 'Content-Type': 'application/json' });
         if (ack_data.tag.ret =="1") {
             scmReturnModifyingMessage(db, pvid, message, args, timeout_second,res, ack_data, scmProcessControl, scmProcessData)
