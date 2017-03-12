@@ -23,11 +23,11 @@ router.get('/ping', function(req, res, next) {
 
 //http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
 router.get('/SendToController', function(req, res, next) {
-       logics.SendControllMessage(req.query.pvid ,req.query.message, req.query.arg, 100,res)
+       logics.SendControllMessage(res,req.query.pvid ,req.query.message, req.query.arg, 100)
 });
 //http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
 router.get('/SubscribeControlMessage', function(req, res, next) {
-      logics.SubscribeControlMessage(req.query.pvid ,req.query.previous_processed_req_id, 100,res)
+      logics.SubscribeControlMessage(res, req.query.pvid)
 });
 //http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
 router.get('/Acknowledge', function(req, res, next) {
@@ -44,9 +44,9 @@ router.get('/Acknowledge', function(req, res, next) {
         if (!array.isArray(d)) {
           d = [d]
         }
-        var jsontag = {"ret": ret, "u":u, "d":d}
+        var jsontag = {"tag":{"ret": ret, "u":u, "d":d}}
       } else {
-        var jsontag = {"ret": ret}
+        var jsontag = {"tag":{"ret": ret}}
 
       }
       
