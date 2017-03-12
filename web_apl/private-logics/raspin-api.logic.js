@@ -13,10 +13,10 @@ console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec
  var pug =require("pug")
 
 
+var MongoClient = require('mongodb').MongoClient
+, assert = require('assert');
 
 module.exports.SendControllMessage = function (pvid, message, args, timeout_second,res){
-  var MongoClient = require('mongodb').MongoClient
-    , assert = require('assert');
   
   // Connection URL
   var url = 'mongodb://localhost:27017/test';
