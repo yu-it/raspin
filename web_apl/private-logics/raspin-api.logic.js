@@ -49,13 +49,13 @@ function SendControllMessageCheckPv(db, pvid, message, args, timeout_second,res,
     }
     var countdown = 1;
     db.collection("controller_provider").findOne({"_id":pvid}, {},function(err, dat) {
-            scmWaitAcknowledge(db, pvid, message, args, timeout_second,res, dat,
+            scmWaitAcknowledge(err, db, pvid, message, args, timeout_second,res, dat,
                 scmReturnModifyingMessage,scmProcessControl, scmProcessData) 
     });
   
 
 }
-function SendControllMessageWaitAcknowledge(db, pvid, message, args, timeout_second,res, dat, scmReturnModifyingMessage, scmProcessControl, scmProcessData) {
+function SendControllMessageWaitAcknowledge(err, db, pvid, message, args, timeout_second,res, dat, scmReturnModifyingMessage, scmProcessControl, scmProcessData) {
     ObId = require('mongodb').ObjectId
     var req_id = new ObId().toString()
     var target_queue = pvid + "_queue"
@@ -63,6 +63,7 @@ function SendControllMessageWaitAcknowledge(db, pvid, message, args, timeout_sec
 
     log("★★★message inserted★★★:" + pvid)
     if (dat == null) {
+        log(err)
         log("★★★not found in controller_privider★★★:" + pvid)
         res.writeHead(500, { 'Content-Type': 'application/json' });
 
