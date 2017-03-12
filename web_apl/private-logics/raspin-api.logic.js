@@ -10,11 +10,15 @@ var sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
 console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec + "  " + str );
 }
 
+var res_OK = JSON.stringify({"ret":"ok"})
+var res_NG = JSON.stringify({"ret":"ng"})
+
  var pug =require("pug")
 
+var client = require('redis').createClient();
 
-var MongoClient = require('mongodb').MongoClient
-, assert = require('assert');
+//var MongoClient = require('mongodb').MongoClient
+//, assert = require('assert');
 
 module.exports.SendControllMessage = function (pvid, message, args, timeout_second,res){
   
@@ -36,6 +40,7 @@ function SendControllMessageMainLogic(db, pvid, message, args, timeout_second,re
           SendControllMessageProcessData
         )
 }
+
 
 function SendControllMessageCheckPv(db, pvid, message, args, timeout_second,res, scmWaitAcknowledge, scmReturnModifyingMessage,scmProcessControl, scmProcessData) {
     log("★★★connected★★★:" + pvid)
@@ -201,33 +206,198 @@ module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id
 
 //以下,mongodbを移植予定の関数群
 //コーディング完テスト未
-module.exports.RegistControllerProvider = function(res,DataDesc) {
+function RegistControllerProviderMain(res,DataDesc) {
     init_vars()
     var check_input = _check_RegistControllerProvider(DataDesc)
     if (check_input) {
-        return check_input
+        return res.send(res_NG)
     }
-    ObId = require('mongodb').ObjectId
-    var pvid = new ObId().toString()
-    DataDesc._id = pvid
-    db.collection(controller_provider).insertOne(DataDesc)
+    client.incr("id")
+    client.get("id", function(err, val) {
+        var pvid = val
+        var tran = client.multi()
+        console.log("id:" + pvid)
 
+        //Controller_providerのデータを登録する
+        tran.rpush(k_name("cp"),  pvid)
+        tran.hset(k_name("dc", pvid), "pvid",pvid)
+        tran.hset(k_name("dc", pvid), "pvname",DataDesc.pvname)
+        tran.hset(k_name("dc", pvid),"queue_size",DataDesc.queue_size)
+        DataDesc.available_message.forEach(function(v) {
+            tran.rpush(k_name("am", pvid), v.message_name)
+        })
 
-    db.createCollection(pvid + "_queue",{ "capped": true,"size":  DataDesc["queue_size"],"max":  DataDesc["queue_size"] },
-        function(err, collection) 
-        {
-            var tmpid = new ObId().toString()
-            collection.insertOne({ "_id": tmpid, "init" : true } )
-            db.createCollection( pvid + "_accepted", { capped: true, "size": Num_SIZE_OF_ACCEPTED } ,
-            function(err,collection) {
-                var tmpid = new ObId().toString()
-                collection.insertOne({ "_id": tmpid, "init" : true } )
-                res.send(JSON.stringify({"pvid": pvid}))
+        //キューは随時作られるからとくに何もする必要ナシ
+        tran.exec(function(){
+            res.send(res_OK)
+        })
+        
+
+    })
+
+}
+module.exports.RegistControllerProvider = RegistControllerProviderMain
+function ModControllerProviderMain (res, pvid, DataDesc) {
+    init_vars()
+    var check_input = _check_RegistControllerProvider(DataDesc)
+    if (check_input) {
+        return res.send(res_NG)
+    }
+    var tran = client.multi()
+    console.log("id:" + pvid)
+
+    //Controller_providerのデータを登録する
+    tran.hset(k_name("dc", pvid), "pvid",pvid)
+    tran.hset(k_name("dc", pvid), "pvname",DataDesc.pvname)
+    tran.hset(k_name("dc", pvid),"queue_size",DataDesc.queue_size)
+    DataDesc.available_message.forEach(function(v) {
+        tran.rpush(k_name("am", pvid), v.message_name)
+    })
+
+    //キューは随時作られるからとくに何もする必要ナシ
+    tran.exec(function(){
+        res.send(res_OK)
+    })
+
+}
+module.exports.ModControllerProvider= ModControllerProviderMain
+function RegistDataProviderMain (res, DataDesc) {
+    init_vars()
+    var check_input = _check_RegistDataProvider(DataDesc)
+    if (check_input) {
+        res.send(res_NG)
+        return
+    }
+
+    client.incr("id")
+    client.get("id", function(err, val) {
+        var pvid = val
+        var tran = client.multi()
+        console.log("id:" + pvid)
+        tran.rpush(k_name("dp"),  pvid)
+
+        //Controller_providerのデータを登録する
+        tran.hset(k_name("dd", pvid), "pvname",DataDesc.pvname)
+        tran.hset(k_name("dd", pvid),"queue_size",DataDesc.queue_size)
+        tran.hset(k_name("dd", pvid),"type",DataDesc.type)
+
+        tran.exec(function(){
+            res.send(res_OK)
+        })
+        
+
+    })
+
+}
+module.exports.RegistDataProvider= RegistDataProviderMain
+
+function AvailableDataProviderMain(res) {
+    init_vars()
+    var ret = []
+    client.lrange(k_name("dp"), 0 ,-1, function(err, pvids) {
+        if (pvids.length == 0) {
+            res.send(res_NG)
+            return
+        }
+        for (var i = 0 ; i < pvids.length; i++) {
+            var pvid = pvids[i]
+            var processed = 0
+            client.hgetall(k_name("dd",  pvid), function (err,dict) {
+                ret.push({"pvid": dict["pvid"], "pvname": dict["pvname"], "type":dict["type"]})
+                processed ++;
+                if (processed == pvids.length) {
+                    res.send(JSON.stringify(ret))
+                }
 
             })
-        });
-}
 
+        }
+        pvids.forEach(function (pvid) {
+            
+        })
+    })
+
+}
+module.exports.AvailableDataProvider= AvailableDataProviderMain
+
+function AvailableControllerProviderMain(res) {
+    init_vars()
+    var ret = []
+    client.lrange(k_name("cp"), 0 ,-1, function(err, pvids) {
+        if (pvids.length == 0) {
+            res.send(res_NG)
+            return
+        }
+        var response_cache_dict = {}
+        var response_list = []
+        for (var i = 0 ; i < pvids.length; i++) {
+            var pvid = pvids[i]
+            var processed = 0
+            client.hgetall(k_name("dc", pvid), function (err,dict) {
+                response_cache_dict[dict["pvid"]] = {"pvid": dict["pvid"], "pvname": dict["pvname"], "queue_size":dict["queue_size"]}
+                client.lrange(k_name("am", dict["pvid"]), 0, -1, function(err, mess_list) {
+                    var rec = response_cache_dict[dict["pvid"]]
+                    var av_mess_json = []
+                    for (var j = 0; j < mess_list.length; j ++) {
+                        av_mess_json.push({"message_name":mess_list[j]})
+                    }
+                    rec["available_message"] = av_mess_json
+                    response_list.push(rec)
+                    processed ++
+                    if (processed >= pvids.length) {
+                        res.send(JSON.stringify(response_list))
+                    }
+
+                })
+
+            })
+
+        }
+    })
+}
+function k_name(desc, param) {
+    if (desc == "cp") {
+        return "controller_provider"
+    } else if (desc == "dp") {
+        return "data_provider"
+    } else if (desc == "dc") {
+       return "detail_con_" + param
+    } else if (desc == "am") {
+        return "av_mess_" + param
+    } else if (desc == "dd") {
+        return "detail_dat_" + param
+    } else if (desc == "dt") {
+        return "detail_dat_" + param
+    } else if (desc == "qu") {
+        return "queue_" + param
+    } else if (desc == "ac") {
+        return "accepted_" + param
+    } else if (desc == "ad") {
+        return "accepted_detail" + param
+    }
+}
+module.exports.AvailableControllerProvider = AvailableControllerProviderMain
+function DeleteProviderMain (res, id) {
+    client.lrem(k_name("cp"), id)
+    client.lrem(k_name("dp"), id)
+    client.del(k_name("dc", id))
+    client.del(k_name("dd", id))
+    client.del(k_name("am", id))
+    client.del(k_name("dt", id))
+    client.del(k_name("qu", id))
+    client.del(k_name("ac", id))
+    client.del(k_name("ad", id))
+    
+}
+module.exports.DeleteProvider= DeleteProviderMain 
+module.exports.SendToController= function (pvid, message, args, timeout_second) {}
+module.exports.SubscribeControlMessage= function (pvid,previous_processed_req_id, timeout_second) {}
+function AcknowledgeMain(res, pvid, req_id, tag) {
+
+}
+module.exports.Acknowledge= AcknowledgeMain
+module.exports.GetOvservationData= function (pvid_ary, previous_gotten_data_id_ary) {}
+module.exports.AddOvservationData= function (pvid, data) {}
 
 function init_vars() {
     Num_SIZE_OF_ACCEPTED = 25600
