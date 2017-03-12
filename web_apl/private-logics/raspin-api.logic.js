@@ -150,8 +150,8 @@ function SendControllMessageProcessData(db, pvid, message, args, timeout_second,
 
 
 module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id, timeout_second, res) {
-  //var MongoClient = require('mongodb').MongoClient
-  //  , assert = require('assert');
+  var MongoClient = require('mongodb').MongoClient
+    , assert = require('assert');
   
   // Connection URL
   var url = 'mongodb://localhost:27017/test';
@@ -181,7 +181,7 @@ module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id
         });
         await_cursor.on('end', function() {
             db.close()
-
+            MongoClient.close(function(){})
         });
     }
 
