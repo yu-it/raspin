@@ -149,15 +149,16 @@ function SendControllMessageProcessData(db, pvid, message, args, timeout_second,
 }
 
 
+var MongoClient2 = require('mongodb').MongoClient
 module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id, timeout_second, res) {
-  var MongoClient = require('mongodb').MongoClient
-    , assert = require('assert');
+  //var MongoClient = require('mongodb').MongoClient
+  //  , assert = require('assert');
   
   // Connection URL
   var url = 'mongodb://localhost:27017/test';
   
   // Use connect method to connect to the server
-  MongoClient.connect(url, function(err, db) {
+  MongoClient2.connect(url, function(err, db) {
     if (timeout_second == 0) {
         time_remain = 120
     } else {
@@ -181,7 +182,7 @@ module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id
         });
         await_cursor.on('end', function() {
             db.close()
-            MongoClient.close(function(){})
+            
         });
     }
 
