@@ -16,194 +16,102 @@ var res_NG = JSON.stringify({"ret":"ng"})
  var pug =require("pug")
 
 var client = require('redis').createClient();
+var client_for_publish = require('redis').createClient();
 
-//var MongoClient = require('mongodb').MongoClient
-//, assert = require('assert');
+//client.flushall()
 
-module.exports.SendControllMessage = function (pvid, message, args, timeout_second,res){
-  
-  // Connection URL
-  var url = 'mongodb://localhost:27017/test';
-  log("★★★send control start★★★:" + pvid)
-  // Use connect method to connect to the server
-  MongoClient.connect(url, function (err, db) {
-      SendControllMessageMainLogic(db, pvid, message, args, timeout_second,res)
-  })
+function getSubscriber() {
+    return require('redis').createClient()
+}
+function getPublisher() {
+    return client_for_publish
 }
 
 
-function SendControllMessageMainLogic(db, pvid, message, args, timeout_second,res) {
-    SendControllMessageCheckPv(db, pvid, message, args, timeout_second,res, 
-        SendControllMessageWaitAcknowledge,
-        SendControllMessageReturnModifyingMessage,
-         SendControllMessageProcessControl,
-          SendControllMessageProcessData
-        )
-}
-
-
-function SendControllMessageCheckPv(db, pvid, message, args, timeout_second,res, scmWaitAcknowledge, scmReturnModifyingMessage,scmProcessControl, scmProcessData) {
-    log("★★★connected★★★:" + pvid)
-    
-    var time_remain = 0
-    if (timeout_second == 0) {
-        time_remain = 120
-    } else {
-        time_remain = Math.min(timeout_second, 120);
-
-    }
-    var countdown = 1;
-    db.collection("controller_provider").findOne({"_id":pvid}, {},function(err, dat) {
-            scmWaitAcknowledge(err, db, pvid, message, args, timeout_second,res, dat,
-                scmReturnModifyingMessage,scmProcessControl, scmProcessData) 
-    });
-  
-
-}
-function SendControllMessageWaitAcknowledge(err, db, pvid, message, args, timeout_second,res, dat, scmReturnModifyingMessage, scmProcessControl, scmProcessData) {
-    ObId = require('mongodb').ObjectId
-    var req_id = new ObId().toString()
-    var target_queue = pvid + "_queue"
-    var target_queue_accepted = pvid + "_accepted"
-
-    log("★★★message inserted★★★:" + pvid)
-    if (dat == null) {
-        log(err)
-        log("★★★not found in controller_privider★★★:" + pvid)
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-
-        res.end(JSON.stringify({"ret":-1, "pvid":pvid}));
-        db.close()
-    }
-    db.collection(target_queue).insertOne({"_id": req_id, "message":message, "arg":args, "init": false})
-    var await_cursor_src = db.collection(target_queue_accepted).find({"_id":req_id}, {tailable:true,await_data:true});
-    var await_cursor = await_cursor_src.stream();
-    await_cursor_src.processed = 0
-    await_cursor.on('data', function(ack_data) {
-        log("★★★accepted★★★:" + pvid)
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        if (ack_data.tag.ret =="1") {
-            scmReturnModifyingMessage(db, pvid, message, args, timeout_second,res, ack_data, scmProcessControl, scmProcessData)
-        } else {
-            res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
-            db.close()
+function SendControllMessageMain(res, pvid, message, args) {
+    client.hexists("controller_provider", pvid, function(err, is_exist) {
+        if (is_exist == 0) {
+            res.send(res_NG)
+            return
         }
+        //reqest識別用一意キーの取得
+        client.incr("id")
+        client.get("id", function(err, req_id) {
+            //request情報書き込み
+            getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
+            log("★★★message inserted★★★:" + pvid)
+            var sub = getSubscriber()
+            sub.on("message", function(channel, ret) {
+                /////以下、リクエスト受理確認後の処理
+                log("★★★accepted★★★:" + pvid)
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
+                if (ack_data.tag.ret =="1") {
+                    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
+                        var contents = create_response_scm(ack_data.tag.u, datas)
+                        var response_text = JSON.stringify({"restype":"modify",
+                            "ctags":[contents["cpvid"],contents["chtml"]],
+                            "dtags":[contents["dpvid"],contents["dhtml"]],
+                            "del":ack_data.tag.d})
+                        res.end(response_text)
+                    })
+                } else {
+                    res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
 
-    });
-    await_cursor.on('end', function() {
-
-    });
-    
-}
-function SendControllMessageReturnModifyingMessage(db, pvid, message, args, timeout_second,res, ack_data,scmProcessControl, scmProcessData) {
-    log("★★★create html★★★"+ack_data.tag.u)
-
-    //更新対象のコントローラを検索し、更新を行う
-    var ctrls = db.collection("controller_provider").find({"_id":{"$in":ack_data.tag.u}}).stream()
-    var cpvid = []
-    var ccontents = []
-    
-    ctrls.on("data",function(ctrl_data){
-        scmProcessControl(db, pvid, message, args, timeout_second,res, ctrl_data, cpvid,ccontents)
-    })
-    ctrls.on("end",function(){
-        log("★★★end end")
-
-        //更新対象のデータプロバイダを検索し、更新を行う
-        var datas = db.collection("data_provider").find({"_id":{"$in":ack_data.tag.u}}).stream()
-        var dpvid = []
-        var dcontents = []
-        
-        datas.on("data",function(data_data){
-            scmProcessData(db, pvid, message, args, timeout_second,res,data_data, dpvid, dcontents)
-        })
-        datas.on("end",function(){
-            //レスポンス返却
-            log("★★★end end")
-            var response_text = JSON.stringify({"restype":"modify","ctags":[cpvid,ccontents],"dtags":[dpvid,dcontents],"del":ack_data.tag.d})
-            log(response_text)
-            res.end(response_text)
-            db.close()
-        })
-                
-    })
-}
-
-function SendControllMessageProcessControl(db, pvid, message, args, timeout_second,res, control_data,ids,contents) {
-    log("★★★got data★★★" + JSON.stringify(control_data))
-    var amess=[]
-    var acount=[]
-    control_data.available_message.forEach(function(mess_rec){
-            amess.push(mess_rec.message_name)
-            acount.push(mess_rec.arg_count)
+                }
             })
-    ids.push(control_data["_id"])
-    var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: control_data["_id"],pvname: control_data.pvname,available_message: amess,arg_count: acount})
-    contents.push(html_contents)
+            sub.subscribe(kname(Key_Accepted,req_id))
+        })
+    })
+}
+
+function create_response_scm(pvids, jsons) {
+    var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
+    for (var update_idx = 0; update_idx < pvids; update_idx ++) {
+        var u_pvid =pvids[update_idx]
+        var json_data = JSON.parse(jsons[update_idx])
+
+        if (json_str == undefined) continue
+
+        if (json_data["ptype"] = "c") {
+            var amess = []
+            var acount  = []
+            json_data.available_message.forEach(function(mess_rec){
+                    amess.push(mess_rec.message_name)
+                    acount.push(mess_rec.arg_count)
+            })
+            var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg_count: acount})
+            response_dict["chtml"].push(html_contents)
+            response_dict["cpvid"].push(u_pvid)
+
+        } else {
+            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type})
+            response_dict["dhtml"].push(html_contents)
+            response_dict["dpvid"].push(u_pvid)
+
+        }
+    }
 
 }
 
+function SubscribeControlMessage(res,pvid) {
 
-function SendControllMessageProcessData(db, pvid, message, args, timeout_second,res,data_data, ids, contents) {
-    log("★★★got data★★★" + JSON.stringify(data_data))
-    
-    ids.push(data_data["_id"])
-    var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:data_data["_id"],pvname: data_data.pvname,type: data_data.type})
-    contents.push(html_contents)
+    log("###subscribe " + pvid)
+    var subscriber = getSubscriber()
+    subscriber.on ("message", function(channel, ret) {
+        log("###accepted")
+        log("###" + ret)
+        res.send(ret)
+    })
+    subscriber.subscribe(k_name(Key_Queue, pvid))
 
 }
 
+function AcknowledgeMain(res, pvid, req_id, tag) {
+    var publisher = getPublisher()
+    publisher.publish(k_name(Key_Accepted, req_id), JSON.stringify(tag))
 
-var MongoClient2 = require('mongodb').MongoClient
-module.exports.SubscribeControlMessage = function(pvid,previous_processed_req_id, timeout_second, res) {
-  //var MongoClient = require('mongodb').MongoClient
-  //  , assert = require('assert');
-  
-  // Connection URL
-  var url = 'mongodb://localhost:27017/test';
-  
-  // Use connect method to connect to the server
-  MongoClient2.connect(url, function(err, db) {
-    if (timeout_second == 0) {
-        time_remain = 120
-    } else {
-        time_remain = Math.min(timeout_second, 120);
-
-    }
-    var countdown = 1;
-    var target_queue = pvid + "_queue"
-
-    var subscribing_proc = function(previous_processed_req_id) {
-        log("###gt " + previous_processed_req_id)
-        var await_cursor_src = db.collection(target_queue).find({_id:{ $gt: previous_processed_req_id }}, {tailable:true})
-        var await_cursor = await_cursor_src.stream();
-        await_cursor.on('data', function(got) {
-            log("###accepted")
-            log("###" + JSON.stringify({"req_id":got._id, "message":got["message"], "arg": got["arg"]}))
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-
-            res.end(JSON.stringify({"req_id":got._id, "message":got["message"], "arg": got["arg"]}));
-            await_cursor_src.close()
-        });
-        await_cursor.on('end', function() {
-            db.close()
-            
-        });
-    }
-
-    if (previous_processed_req_id == "") {
-        db.collection(target_queue).findOne({"init" : true},function(err, docs) {
-            subscribing_proc(docs["_id"])
-
-        });
-        
-    } else {
-        subscribing_proc(previous_processed_req_id)
-
-    }
-  })
 }
-
 //以下,mongodbを移植予定の関数群
 //コーディング完テスト未
 function RegistControllerProviderMain(res,DataDesc) {
@@ -217,26 +125,22 @@ function RegistControllerProviderMain(res,DataDesc) {
         var pvid = val
         var tran = client.multi()
         console.log("id:" + pvid)
+        DataDesc["pvid"] = pvid
+        DataDesc["ptype"] = "c"
 
         //Controller_providerのデータを登録する
-        tran.rpush(k_name("cp"),  pvid)
-        tran.hset(k_name("dc", pvid), "pvid",pvid)
-        tran.hset(k_name("dc", pvid), "pvname",DataDesc.pvname)
-        tran.hset(k_name("dc", pvid),"queue_size",DataDesc.queue_size)
-        DataDesc.available_message.forEach(function(v) {
-            tran.rpush(k_name("am", pvid), v.message_name)
-        })
+        tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
+        tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
 
         //キューは随時作られるからとくに何もする必要ナシ
         tran.exec(function(){
-            res.send(res_OK)
+            res.send(JSON.stringify({"pvid":pvid}))
         })
         
 
     })
 
 }
-module.exports.RegistControllerProvider = RegistControllerProviderMain
 function ModControllerProviderMain (res, pvid, DataDesc) {
     init_vars()
     var check_input = _check_RegistControllerProvider(DataDesc)
@@ -245,22 +149,18 @@ function ModControllerProviderMain (res, pvid, DataDesc) {
     }
     var tran = client.multi()
     console.log("id:" + pvid)
-
+    DataDesc["pvid"] = pvid
+    DataDesc["ptype"] = "c"
     //Controller_providerのデータを登録する
-    tran.hset(k_name("dc", pvid), "pvid",pvid)
-    tran.hset(k_name("dc", pvid), "pvname",DataDesc.pvname)
-    tran.hset(k_name("dc", pvid),"queue_size",DataDesc.queue_size)
-    DataDesc.available_message.forEach(function(v) {
-        tran.rpush(k_name("am", pvid), v.message_name)
-    })
+    tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
+    tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
 
     //キューは随時作られるからとくに何もする必要ナシ
     tran.exec(function(){
-        res.send(res_OK)
+        res.send(JSON.stringify({"pvid":pvid}))
     })
 
 }
-module.exports.ModControllerProvider= ModControllerProviderMain
 function RegistDataProviderMain (res, DataDesc) {
     init_vars()
     var check_input = _check_RegistDataProvider(DataDesc)
@@ -273,137 +173,130 @@ function RegistDataProviderMain (res, DataDesc) {
     client.get("id", function(err, val) {
         var pvid = val
         var tran = client.multi()
+        DataDesc["pvid"] = pvid
+        DataDesc["ptype"] = "d"
         console.log("id:" + pvid)
-        tran.rpush(k_name("dp"),  pvid)
-
-        //Controller_providerのデータを登録する
-        tran.hset(k_name("dd", pvid), "pvname",DataDesc.pvname)
-        tran.hset(k_name("dd", pvid),"queue_size",DataDesc.queue_size)
-        tran.hset(k_name("dd", pvid),"type",DataDesc.type)
+        tran.hset(k_name(Key_Data_Provider),  pvid, JSON.stringify(DataDesc))
+        tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
 
         tran.exec(function(){
-            res.send(res_OK)
+            res.send(JSON.stringify({"pvid":pvid}))
         })
         
 
     })
 
 }
-module.exports.RegistDataProvider= RegistDataProviderMain
 
 function AvailableDataProviderMain(res) {
     init_vars()
     var ret = []
-    client.lrange(k_name("dp"), 0 ,-1, function(err, pvids) {
-        if (pvids.length == 0) {
-            res.send(res_NG)
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    client.hgetall(k_name(Key_Data_Provider), function (err, datas) {
+        if (datas == undefined) {
+            res.send(JSON.stringify([]))
             return
         }
-        for (var i = 0 ; i < pvids.length; i++) {
-            var pvid = pvids[i]
-            var processed = 0
-            client.hgetall(k_name("dd",  pvid), function (err,dict) {
-                ret.push({"pvid": dict["pvid"], "pvname": dict["pvname"], "type":dict["type"]})
-                processed ++;
-                if (processed == pvids.length) {
-                    res.send(JSON.stringify(ret))
-                }
-
-            })
+        var data_array = []
+        for (var k in datas) {
+            data_array(datas[k])
 
         }
-        pvids.forEach(function (pvid) {
-            
-        })
+        res.end(JSON.stringify(data_array))
     })
-
 }
-module.exports.AvailableDataProvider= AvailableDataProviderMain
 
 function AvailableControllerProviderMain(res) {
     init_vars()
     var ret = []
-    client.lrange(k_name("cp"), 0 ,-1, function(err, pvids) {
-        if (pvids.length == 0) {
-            res.send(res_NG)
-            return
-        }
-        var response_cache_dict = {}
-        var response_list = []
-        for (var i = 0 ; i < pvids.length; i++) {
-            var pvid = pvids[i]
-            var processed = 0
-            client.hgetall(k_name("dc", pvid), function (err,dict) {
-                response_cache_dict[dict["pvid"]] = {"pvid": dict["pvid"], "pvname": dict["pvname"], "queue_size":dict["queue_size"]}
-                client.lrange(k_name("am", dict["pvid"]), 0, -1, function(err, mess_list) {
-                    var rec = response_cache_dict[dict["pvid"]]
-                    var av_mess_json = []
-                    for (var j = 0; j < mess_list.length; j ++) {
-                        av_mess_json.push({"message_name":mess_list[j]})
-                    }
-                    rec["available_message"] = av_mess_json
-                    response_list.push(rec)
-                    processed ++
-                    if (processed >= pvids.length) {
-                        res.send(JSON.stringify(response_list))
-                    }
-
-                })
-
-            })
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    client.hgetall(k_name(Key_Controller_Provider),  function(err, datas) {
+        var data_array = []
+        for (var k in datas) {
+            data_array.push(datas[k])
 
         }
+        res.end(JSON.stringify(data_array))
     })
 }
 function k_name(desc, param) {
-    if (desc == "cp") {
+    if (desc == Key_Controller_Provider) {
         return "controller_provider"
-    } else if (desc == "dp") {
+    } else if (desc == Key_Data_Provider) {
         return "data_provider"
-    } else if (desc == "dc") {
-       return "detail_con_" + param
-    } else if (desc == "am") {
-        return "av_mess_" + param
-    } else if (desc == "dd") {
-        return "detail_dat_" + param
-    } else if (desc == "dt") {
-        return "detail_dat_" + param
-    } else if (desc == "qu") {
+    } else if (desc == Key_All_Provider) {
+        return "all_provider"
+    } else if (desc == Key_Data) {
+        return "data_" + param
+    } else if (desc == Key_Queue) {
         return "queue_" + param
-    } else if (desc == "ac") {
+    } else if (desc == Key_Accepted) {
         return "accepted_" + param
-    } else if (desc == "ad") {
-        return "accepted_detail" + param
+    } else if (desc == Key_Data_Number) {
+        return "data_number_seq"
     }
 }
-module.exports.AvailableControllerProvider = AvailableControllerProviderMain
+var Key_All_Provider = "ap"
+var Key_Controller_Provider = "cp"
+var Key_Data_Provider = "dp"
+var Key_Data = "dt"
+var Key_Queue = "qu"
+var Key_Accepted = "ac"
+var Key_Data_Number = "dn"
+
 function DeleteProviderMain (res, id) {
-    client.lrem(k_name("cp"), id)
-    client.lrem(k_name("dp"), id)
-    client.del(k_name("dc", id))
-    client.del(k_name("dd", id))
-    client.del(k_name("am", id))
-    client.del(k_name("dt", id))
-    client.del(k_name("qu", id))
-    client.del(k_name("ac", id))
-    client.del(k_name("ad", id))
+    client.hdel(k_name(Key_Controller_Provider), id)
+    client.hdel(k_name(Key_Data_Provider), id)
+    client.hdel(k_name(Key_All_Provider), id)
+    client.del(k_name(Key_Data, id))
+    client.del(k_name(Key_Queue, id))
+    client.del(k_name(Key_Accepted, id))
+    res.send(res_OK)
     
 }
-module.exports.DeleteProvider= DeleteProviderMain 
-module.exports.SendToController= function (pvid, message, args, timeout_second) {}
-module.exports.SubscribeControlMessage= function (pvid,previous_processed_req_id, timeout_second) {}
-function AcknowledgeMain(res, pvid, req_id, tag) {
+function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
+    var ret = []
+    var processed = 0
+    for (var i = 0; i <  pvid_ary.length; i++) {
+        var pvid = pvid_ary[i]
+        var previous_gotten_data_id = previous_gotten_data_id_ary[i]
+        
+        if (previous_gotten_data_id == "") {
+            previous_gotten_data_id = 0
 
+        }
+        client.zrangebyscore(k_name(Key_Data,pvid), previous_gotten_data_id,Infinity, "withscores", function(err, val) {
+            for (var j = 0; j < val.length; j += 2) {
+                ret.push({"data_id" : val[j + 1], "data" : val[j].substring(val[j].indexOf("-") + 1), "pvid":this.args[0].substring("data_".length)})
+            }
+            processed ++
+            if (processed >= pvid_ary.length) {
+                res.send(JSON.stringify(ret))
+            }
+        })
+
+    }
+    
 }
-module.exports.Acknowledge= AcknowledgeMain
-module.exports.GetOvservationData= function (pvid_ary, previous_gotten_data_id_ary) {}
-module.exports.AddOvservationData= function (pvid, data) {}
+function AddOvservationDataMain(res, pvid, data) {
+    client.hexists("data_provider", pvid, function(err, is_exist) {
+        if (is_exist == 0) {
+            res.send(res_NG)
+            return
+        }
+
+        client.incr(k_name(Key_Data_Number))
+        client.get(k_name(Key_Data_Number), function(err, val) {
+            client.zadd(k_name(Key_Data, pvid), val, val + "-" + data)
+            res.send(res_OK)
+        })
+    })
+}
 
 function init_vars() {
     Num_SIZE_OF_ACCEPTED = 25600
     Enum_DATA_TYPE = ["video","num","message"]
-    DB_CONTROLLER_PV = db.controller_provider
-    DB_DATA_PV = db.data_provider
     Num_MAX_WAIT_CONTROL = 120
 
 }
@@ -509,3 +402,16 @@ function _create_error(mess) {
     init_vars()
     return {error:mess}
 }
+
+
+module.exports.SendControllMessage = SendControllMessageMain                    //
+module.exports.SubscribeControlMessage = SubscribeControlMessage                //
+module.exports.RegistControllerProvider = RegistControllerProviderMain          //
+module.exports.ModControllerProvider= ModControllerProviderMain                 //
+module.exports.RegistDataProvider= RegistDataProviderMain                       //
+module.exports.AvailableDataProvider= AvailableDataProviderMain                 //
+module.exports.AvailableControllerProvider = AvailableControllerProviderMain    //
+module.exports.DeleteProvider= DeleteProviderMain                               //
+module.exports.Acknowledge= AcknowledgeMain                                     //
+module.exports.GetOvservationData= GetObservationDataMain                       //
+module.exports.AddOvservationData = AddOvservationDataMain                      //
