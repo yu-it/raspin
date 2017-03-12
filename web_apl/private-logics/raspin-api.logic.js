@@ -60,7 +60,7 @@ function SendControllMessageMain(res, pvid, message, args) {
 
                 }
             })
-            sub.subscribe(kname(Key_Accepted,req_id))
+            sub.subscribe(k_name(Key_Accepted,req_id))
         })
     })
 }
