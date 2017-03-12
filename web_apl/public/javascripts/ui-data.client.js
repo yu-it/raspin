@@ -9,49 +9,34 @@ function routine_process() {
 }
 function update_logging_data() {
     var data_views = $(".field_data").find(".pv_base");
+    var urlstr = "raspin-api/GetOvservationData?"
     for(var i=0; i < data_views.length; i++) {
         var view = data_views.eq(i);
-        if (view.attr("data_type") == "video") {
-            continue
-        } else if (view.attr("data_type") == "num") {
-            var pvid = view.attr("pvid")
-            var urlstr = "raspin-api/GetOvservationData?pvid=" + pvid + "&previous_processed_data_id=" + view.attr("previous_processed_data_id")
-            $.ajax(
-            {
-                url:urlstr,
-                success : function(msg) {
-                    var htm = ""
-                    if (Array.isArray(msg)) {
-                        msg.forEach(function(entry){
-                            $("#num_" + entry.pvid).html(entry.data)
-                            view.attr("previous_processed_data_id",entry.data_id)
-                        })
-                    }
-                },
-                error : control_error_handler
-            }
-            )
-        } else if (view.attr("data_type") == "message") {
-            var pvid = view.attr("pvid")
-            var urlstr = "raspin-api/GetOvservationData?pvid=" + pvid + "&previous_processed_data_id=" + view.attr("previous_processed_data_id")
-            $.ajax(
-            {
-                url:urlstr,
-                success : function(msg) {
-                    var htm = ""
-                    if (Array.isArray(msg)) {
-                        msg.forEach(function(entry){
-
-                            $("#message_" + entry.pvid).text(entry.data)
-                            view.attr("previous_processed_data_id",entry.data_id)
-                        })
-                    }
-                },
-                error : control_error_handler
-            }
-            )
-        }
+        urlstr += "pvid=" + view.attr("pvid") + "&previous_processed_data_id=" + view.attr("previous_processed_data_id") + "&"
     }
+    urlstr = urlstr.substring(0, urlstr.length - 1)
+    $.ajax(
+    {
+        url:urlstr,
+        success : function(msg) {
+            var htm = ""
+            if (Array.isArray(msg)) {
+                msg.forEach(function(entry){
+                    if ($("#num_" + entry.pvid).length) {
+                        $("#num_" + entry.pvid).html(entry.data)
+                        $("#area_" + entry.pvid).attr("previous_processed_data_id",entry.data_id)
+
+                    } else if ($("#video_" + entry.pvid).length) {
+                    } else if ($("#message_" + entry.pvid).length) {
+                        $("#message_" + entry.pvid).text(entry.data)
+                        $("#area_" + entry.pvid).attr("previous_processed_data_id",entry.data_id)
+                    }
+                })
+            }
+        },
+        error : control_error_handler
+    }
+    )
         
 }
 

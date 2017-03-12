@@ -185,18 +185,25 @@ db.system.js.save({"_id":"Acknowledge", value:function(pvid, req_id, tag) {
 }
 })
 
-db.system.js.save({"_id":"GetOvservationData", value:function(pvid, previous_gotten_data_id) {
+db.system.js.save({"_id":"GetOvservationData", value:function(pvid_ary, previous_gotten_data_id_ary) {
     init_vars()
-    var target_data = pvid + "_data"
+    print(pvid_ary)
+    print(previous_gotten_data_id_ary)
     var ret = []
-    if (previous_gotten_data_id == "") {
-        previous_gotten_data_id = db[target_data].findOne()["_id"]
+    for (var i = 0; i <  pvid_ary.length; i++) {
+        var pvid = pvid_ary[i]
+        var previous_gotten_data_id = previous_gotten_data_id_ary[i]
+        
+        var target_data = pvid + "_data"
+        if (previous_gotten_data_id == "") {
+            previous_gotten_data_id = db[target_data].findOne()["_id"]
+
+        }
+        db[target_data].find({"_id": {$gt : previous_gotten_data_id}}).forEach(function (rec) {
+            ret.push({"data_id" : rec["_id"], "data" : rec["data"], "pvid":pvid})
+        })
 
     }
-    db[target_data].find({"_id": {$gt : previous_gotten_data_id}}).forEach(function (rec) {
-        ret = []    //最後のだけにするか悩み中
-        ret.push({"data_id" : rec["_id"], "data" : rec["data"], "pvid":pvid})
-    })
     return ret
 }
 })
