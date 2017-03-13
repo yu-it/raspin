@@ -17,6 +17,22 @@ var res_NG = JSON.stringify({"ret":"ng"})
 
 var client = require('redis').createClient();
 var client_for_publish = require('redis').createClient();
+var client_for_subscribe = require('redis').createClient();
+
+client_for_subscribe_queue.subscribe("queue_*")
+
+
+client_for_subscribe_accepted.subscribe("accepted_*")
+
+var queue_response = {}
+client_for_subscribe_queue.on("message",function(channel, mess) {
+	var pvid = channel.substring(channel.indexOf("_") + 1)
+	if (pvid in queue_response) {
+		//I want to detect timeout...
+	queue_response[pvid].send(mess)	
+	}
+})
+
 
 //client.flushall()
 
