@@ -1,28 +1,26 @@
+var pug =require("pug")
 
 function log(str){
 	var d = new Date();
-var year  = d.getFullYear();
-var month = d.getMonth() + 1;
-var day   = d.getDate();
-var hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
-var min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
-var sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
-console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec + "  " + str );
+	var year  = d.getFullYear();
+	var month = d.getMonth() + 1;
+	var day   = d.getDate();
+	var hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
+	var min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
+	var sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
+	console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec + "  " + str );
 }
 
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
 
- var pug =require("pug")
 
 var client = require('redis').createClient();
 var client_for_publish = require('redis').createClient();
 var client_for_subscribe = require('redis').createClient();
 
-client_for_subscribe_queue.subscribe("queue_*")
-
-
-client_for_subscribe_accepted.subscribe("accepted_*")
+client_for_subscribe_queue.psubscribe("queue_*")
+client_for_subscribe_accepted.psubscribe("accepted_*")
 
 var queue_response = {}
 var accepted_response = {}
