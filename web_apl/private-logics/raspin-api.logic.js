@@ -24,7 +24,7 @@ client_for_subscribe_accepted.psubscribe("accepted_*")
 
 var queue_response = {}
 var accepted_response = {}
-client_for_subscribe_queue.on("message",function(channel, mess) {
+client_for_subscribe_queue.on("message",function(pattern, channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
 	if (pvid in queue_response) {
 		//I want to detect timeout...
@@ -35,7 +35,7 @@ client_for_subscribe_queue.on("message",function(channel, mess) {
 })
 
 
-client_for_subscribe_accepted.on("message",function(channel, ret) {
+client_for_subscribe_accepted.on("message",function(pattern, channel, ret) {
 	var req_id = channel.substring(channel.indexOf("_") + 1)
 	var res = accepted_response[req_id]
 	if (req_id in accepted_response) {
