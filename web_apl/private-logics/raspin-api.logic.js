@@ -25,24 +25,34 @@ client_for_subscribe_queue.subscribe("queue_*")
 client_for_subscribe_accepted.subscribe("accepted_*")
 
 var queue_response = {}
+var accepted_response = {}
 client_for_subscribe_queue.on("message",function(channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
 	if (pvid in queue_response) {
 		//I want to detect timeout...
-	queue_response[pvid].send(mess)	
+		queue_response[pvid].send(mess)	
+		queue_response[pvid] = null
+		
+	}
+})
+
+
+client_for_subscribe_accepted.on("message",function(channel, ret) {
+	var req_id = channel.substring(channel.indexOf("_") + 1)
+	var res = accepted_response[req_id]
+	if (req_id in accepted_response) {
+    	//I want to detect timeout...
+		SendControllMessageAfterAcknowledged(res,req_id, ret)
+        accepted_response[req_id] = null
 	}
 })
 
 
 //client.flushall()
 
-function getSubscriber() {
-    return require('redis').createClient()
-}
 function getPublisher() {
     return client_for_publish
 }
-
 
 function SendControllMessageMain(res, pvid, message, args) {
     client.hexists("controller_provider", pvid, function(err, is_exist) {
@@ -55,33 +65,33 @@ function SendControllMessageMain(res, pvid, message, args) {
         client.get("id", function(err, req_id) {
             //request情報書き込み
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
-            log("★★★message inserted★★★:" + pvid)
-            var sub = getSubscriber()
-            sub.on("message", function(channel, ret) {
-                /////以下、リクエスト受理確認後の処理
-                log("★★★accepted★★★:" + pvid)
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
-                if (ack_data.tag.ret =="1") {
-                    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
-                        var contents = create_response_scm(ack_data.tag.u, datas)
-                        var response_text = JSON.stringify({"restype":"modify",
-                            "ctags":[contents["cpvid"],contents["chtml"]],
-                            "dtags":[contents["dpvid"],contents["dhtml"]],
-                            "del":ack_data.tag.d})
-                        res.end(response_text)
-                    })
-                } else {
-                    res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
-
-                }
-            })
-            sub.subscribe(k_name(Key_Accepted,req_id))
+            log("★★★message inserted★★★:" + pvid + "/" + req_id)
+    	    response_accepted[req_id] = res
         })
     })
 }
+function SendControllMessageAfterAcknowledged(res, req_id, ret) {
+	/////以下、リクエスト受理確認後の処理
+	log("★★★accepted★★★:" + req_id)
+	res.writeHead(200, { 'Content-Type': 'application/json' });
+	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
+	if (ack_data.tag.ret =="1") {
+	    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
+		var contents = SendControllMessageCreateResponseData(ack_data.tag.u, datas)
+		var response_text = JSON.stringify({"restype":"modify",
+		    "ctags":[contents["cpvid"],contents["chtml"]],
+		    "dtags":[contents["dpvid"],contents["dhtml"]],
+		    "del":ack_data.tag.d})
+		res.end(response_text)
+	    })
+	} else {
+	    res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
 
-function create_response_scm(pvids, jsons) {
+	}
+
+}
+
+function SendControllMessageCreateResponseData(pvids, jsons) {
     var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
     for (var update_idx = 0; update_idx < pvids; update_idx ++) {
         var u_pvid =pvids[update_idx]
@@ -111,15 +121,7 @@ function create_response_scm(pvids, jsons) {
 }
 
 function SubscribeControlMessage(res,pvid) {
-
-    log("###subscribe " + pvid)
-    var subscriber = getSubscriber()
-    subscriber.on ("message", function(channel, ret) {
-        log("###accepted")
-        log("###" + ret)
-        res.send(ret)
-    })
-    subscriber.subscribe(k_name(Key_Queue, pvid))
+	queue_response[pvid] = res
 
 }
 
