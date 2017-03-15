@@ -34,7 +34,6 @@ class api:
             raise Exception(message)
 
     def subscribe_control_message(self, pvid, timeout_second):
-
         query = 'SubscribeControlMessage?pvid={pvid}'.format(pvid = pvid)
         try:
             return self.__call_api_get(query)
@@ -56,12 +55,11 @@ class api:
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
-
     def register_data_provider(self,pvname, queue_size, type):
         query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}".format(pv_name=pvname,queue_size=queue_size,type=type)
-        return self.__call_api_get(query.format(pv_name=pvname, queue_size=queue_size, type=type))
+        return self.__call_api_get(query)
 
-    def ModControllerProvider(self, pvid, pv_name, queue_size, available_messages):
+    def mod_controller_provider(self, pvid, pv_name, queue_size, available_messages):
         query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=pv_name,queue_size=queue_size)
         msgs = []
         for message, count in available_messages:
@@ -69,11 +67,19 @@ class api:
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
+    def acknowledge(self,pvid, req_id, ret, u, d):
+        query = "Acknowledge?pvid={pvid}&req_id={reqid}&ret={ret}&".format(pvid=pvid,reqid=req_id,ret=ret)
+        umsgs = []
+        for update in u:
+            msgs.append("u={u}"".format(u=update))
+        query += "&".join(umsgs)
 
-    def Acknowledge(self,id, req_id, ret, u, d):
-        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=pv_name,queue_size=queue_size)
+        dmsgs = []
+        for de in d:
+            msgs.append("d={d}"".format(d=de))
+        query += "&".join(dmgs)
         return self.__call_api_get(query)
 
-
-    def DeleteProvider(pvid):
-        db.system_js.DeleteProvider(pvid)
+    def delete_provider(self,pvid):
+        query = "DeleteProvider?pvid={pvid}".format(pvid=pvid)
+        return self.__call_api_get(query)
