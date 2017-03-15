@@ -19,7 +19,7 @@ var client = require('redis').createClient();
 var client_for_publish = require('redis').createClient();
 var client_for_subscribe_queue = require('redis').createClient();
 var client_for_subscribe_accepted = require('redis').createClient();
-
+client.flushall()
 client_for_subscribe_queue.psubscribe("queue_*")
 client_for_subscribe_accepted.psubscribe("accepted_*")
 
@@ -81,6 +81,7 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 		    "ctags":[contents["cpvid"],contents["chtml"]],
 		    "dtags":[contents["dpvid"],contents["dhtml"]],
 		    "del":ack_data.tag.d})
+            log(response_text)
 		res.end(response_text)
 	    })
 	} else {
@@ -92,13 +93,14 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 
 function SendControllMessageCreateResponseData(pvids, jsons) {
     var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
-    for (var update_idx = 0; update_idx < pvids; update_idx ++) {
+    for (var update_idx = 0; update_idx < pvids.length; update_idx ++) {
         var u_pvid =pvids[update_idx]
         var json_data = JSON.parse(jsons[update_idx])
+        if (json_data == undefined || !("ptype" in json_data)) {
+            continue
+        }
 
-        if (json_str == undefined) continue
-
-        if (json_data["ptype"] = "c") {
+        if (json_data["ptype"] == "c") {
             var amess = []
             var acount  = []
             json_data.available_message.forEach(function(mess_rec){
@@ -116,6 +118,7 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
 
         }
     }
+    return response_dict
 
 }
 
@@ -213,12 +216,12 @@ function AvailableDataProviderMain(res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     client.hgetall(k_name(Key_Data_Provider), function (err, datas) {
         if (datas == undefined) {
-            res.send(JSON.stringify([]))
+            res.end(JSON.stringify([]))
             return
         }
         var data_array = []
         for (var k in datas) {
-            data_array(datas[k])
+            data_array.push(JSON.parse(datas[k]))
 
         }
         res.end(JSON.stringify(data_array))
@@ -232,7 +235,7 @@ function AvailableControllerProviderMain(res) {
     client.hgetall(k_name(Key_Controller_Provider),  function(err, datas) {
         var data_array = []
         for (var k in datas) {
-            data_array.push(datas[k])
+            data_array.push(JSON.parse(datas[k]))
 
         }
         res.end(JSON.stringify(data_array))
@@ -276,6 +279,7 @@ function DeleteProviderMain (res, id) {
 function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
     var ret = []
     var processed = 0
+    res.writeHead(200, { 'Content-Type': 'application/json' });
     for (var i = 0; i <  pvid_ary.length; i++) {
         var pvid = pvid_ary[i]
         var previous_gotten_data_id = previous_gotten_data_id_ary[i]
@@ -285,12 +289,16 @@ function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
 
         }
         client.zrangebyscore(k_name(Key_Data,pvid), previous_gotten_data_id,Infinity, "withscores", function(err, val) {
+            if (val == undefined) {
+                processed ++
+                return
+            }
             for (var j = 0; j < val.length; j += 2) {
                 ret.push({"data_id" : val[j + 1], "data" : val[j].substring(val[j].indexOf("-") + 1), "pvid":this.args[0].substring("data_".length)})
             }
             processed ++
             if (processed >= pvid_ary.length) {
-                res.send(JSON.stringify(ret))
+                res.end(JSON.stringify(ret))
             }
         })
 

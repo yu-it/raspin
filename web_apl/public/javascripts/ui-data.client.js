@@ -2,6 +2,10 @@ routine_process()
 routine_process_is_functioning = false
 function routine_process() {
     routine_process_is_functioning = true
+    if ( $(".field_data").find(".pv_base").length == 0) {
+        routine_process_is_functioning = false
+        return
+    }
     setTimeout(function() {
         update_logging_data()
         routine_process()

@@ -38,10 +38,10 @@ router.get('/Acknowledge', function(req, res, next) {
       var u = req.query.u
       var d = req.query.d
       if (ret == "1") {
-        if (!array.isArray(u)) {
+        if (!Array.isArray(u)) {
           u = [u]
         }
-        if (!array.isArray(d)) {
+        if (!Array.isArray(d)) {
           d = [d]
         }
         var jsontag = {"tag":{"ret": ret, "u":u, "d":d}}

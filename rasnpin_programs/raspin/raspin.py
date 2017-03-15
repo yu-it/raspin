@@ -9,10 +9,11 @@ class api:
     #serverにはサーバ名またはIP,portにはポート番号
     def __init__(self, server, port):
         #http://localhost:3000
-        self.api_template = "http://{server}:{port}/raspin-api/{query}".format(server=server, port=port)
+        self.api_template = "http://" + server + ":" + str(port) + "/raspin-api/{query}"
         self.ping()
 
     def __call_api_get(self, path):
+
         return self.__http_get(self.api_template.format(query = path))
 
     def __http_get(self, url):
@@ -21,7 +22,7 @@ class api:
         res = r.read()
         return json.loads(res)
 
-    def __log(message):
+    def __log(self, message):
         print(message)
 
     def ping(self):
@@ -41,29 +42,29 @@ class api:
             raise ex
 
     def add_observation_data(self, pvid, data):
-        query = 'AddObservationData?pvid={pvid}&data={data}'.format(pvid = pvid, data = data)
+        query = 'AddObservationData?pvid={pvid}&data={data}'.format(pvid = pvid, data = urllib2.quote(str(data)))
         self.__call_api_get(query)
 
     def register_controller_provider_old(self, json_definition):
         return self.regist_controller_provider(json_definition["pvname"], json_definition["queue_size"], json_definition["available_message"]  )
 
     def register_controller_provider(self, pv_name, queue_size, available_messages):
-        query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&".format(pv_name=pv_name,queue_size=queue_size)
+        query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&".format(pv_name=urllib2.quote(pv_name),queue_size=queue_size)
         msgs = []
-        for message, count in available_messages:
-            msgs.append("message_name={message}&arg_count={arg_count}".format(message, count))
+        for message in available_messages:
+            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
     def register_data_provider(self,pvname, queue_size, type):
-        query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}".format(pv_name=pvname,queue_size=queue_size,type=type)
+        query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}".format(pv_name=urllib2.quote(pvname),queue_size=queue_size,type=type)
         return self.__call_api_get(query)
 
     def mod_controller_provider(self, pvid, pv_name, queue_size, available_messages):
-        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=pv_name,queue_size=queue_size)
+        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=urllib2.quote(pv_name),queue_size=queue_size)
         msgs = []
-        for message, count in available_messages:
-            msgs.append("message_name={message}&arg_count={arg_count}".format(message, count))
+        for message in available_messages:
+            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
@@ -71,13 +72,11 @@ class api:
         query = "Acknowledge?pvid={pvid}&req_id={reqid}&ret={ret}&".format(pvid=pvid,reqid=req_id,ret=ret)
         umsgs = []
         for update in u:
-            msgs.append("u={u}"".format(u=update))
-        query += "&".join(umsgs)
+            umsgs.append("u={u}".format(u=update))
 
-        dmsgs = []
         for de in d:
-            msgs.append("d={d}"".format(d=de))
-        query += "&".join(dmgs)
+            umsgs.append("d={d}".format(d=de))
+        query += "&".join(umsgs)
         return self.__call_api_get(query)
 
     def delete_provider(self,pvid):

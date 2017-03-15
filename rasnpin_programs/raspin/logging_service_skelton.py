@@ -20,7 +20,7 @@ class logging_service_skelton:
     def __init__(self):
         self.pvid = ""
         self.p = None
-        self.api = raspin.raspin("localhost",3000)
+        self.api = raspin.api("localhost",3000)
 
 
     def initialize(self, pvname, data_type):
@@ -67,7 +67,7 @@ class logging_service_skelton:
         self.pvid = self.api.register_controller_provider(
             self.json_stopping["pvname"],
             self.json_stopping["queue_size"],
-            self.json_stopping["available_message"])
+            self.json_stopping["available_message"])["pvid"]
         last_req_id = ""
         data_pv_id = ""
         while True:
@@ -76,31 +76,36 @@ class logging_service_skelton:
             log(mess)
             if mess is None:
                 continue
-            last_req_id = mess['req_id']
             if mess["message"] == "end_{pvname}_service".format(pvname=self.pvname):
                 self.api.acknowledge(self.pvid, mess['req_id'], "1", [], [self.pvid,data_pv_id ])
-                
-                ######ここまで移植#####
+
                 break
             else:
                 log("pvid:{pv},req_id:{req}".format(req=mess['req_id'], pv=self.pvid))
                 if self.p is None:
-                    data_pv_id = raspin.RegistDataProvider(
-                        self.data_pv_json)
+                    data_pv_id = self.api.register_data_provider(self.data_pv_json["pvname"], self.data_pv_json["queue_size"], self.data_pv_json["type"])["pvid"]
                     self.__launch_process(data_pv_id)
-                    raspin.ModControllerProvider(self.pvid, self.json_running)
-                    raspin.Acknowledge(self.pvid, mess['req_id'], {"ret": "1", "u": [self.pvid,data_pv_id ], "d": []})
+                    self.api.mod_controller_provider(self.pvid,
+                                                     self.json_running["pvname"],
+                                                     self.json_running["queue_size"],
+                                                     self.json_running["available_message"]
+                                                     )
+                    self.api.acknowledge(self.pvid, mess['req_id'], "1", [self.pvid,data_pv_id ], [])
 
                 else:
-                    raspin.DeleteProvider(data_pv_id)
+                    self.api.delete_provider(data_pv_id)
                     self.__stop_process()
-                    raspin.ModControllerProvider(self.pvid, self.json_stopping)
-                    raspin.Acknowledge(self.pvid, mess['req_id'], {"ret": "1", "d": [data_pv_id], "u": [self.pvid]})
+                    self.api.mod_controller_provider(self.pvid,
+                                                     self.json_stopping["pvname"],
+                                                     self.json_stopping["queue_size"],
+                                                     self.json_stopping["available_message"]
+                                                     )
+                    self.api.acknowledge(self.pvid, mess['req_id'], "1",  [self.pvid],[data_pv_id])
                     data_pv_id = ""
 
         if data_pv_id <> "":
             self.__stop_process()
-            raspin.DeleteProvider(data_pv_id)
-            raspin.DeleteProvider(self.pvid)
+            self.api.delete_provider(data_pv_id)
+            self.api.delete_provider(self.pvid)
 
 
