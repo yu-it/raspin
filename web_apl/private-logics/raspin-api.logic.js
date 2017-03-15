@@ -17,31 +17,32 @@ var res_NG = JSON.stringify({"ret":"ng"})
 
 var client = require('redis').createClient();
 var client_for_publish = require('redis').createClient();
-var client_for_subscribe = require('redis').createClient();
+var client_for_subscribe_queue = require('redis').createClient();
+var client_for_subscribe_accepted = require('redis').createClient();
 
 client_for_subscribe_queue.psubscribe("queue_*")
 client_for_subscribe_accepted.psubscribe("accepted_*")
 
-var queue_response = {}
-var accepted_response = {}
-client_for_subscribe_queue.on("message",function(pattern, channel, mess) {
+var response_queue = {}
+var response_accepted = {}
+client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
-	if (pvid in queue_response) {
+	if (pvid in response_queue) {
 		//I want to detect timeout...
-		queue_response[pvid].send(mess)	
-		queue_response[pvid] = null
+		response_queue[pvid].send(mess)	
+		response_queue[pvid] = null
 		
 	}
 })
 
 
-client_for_subscribe_accepted.on("message",function(pattern, channel, ret) {
+client_for_subscribe_accepted.on("pmessage",function(pattern, channel, ret) {
 	var req_id = channel.substring(channel.indexOf("_") + 1)
-	var res = accepted_response[req_id]
-	if (req_id in accepted_response) {
+	var res = response_accepted[req_id]
+	if (req_id in response_accepted) {
     	//I want to detect timeout...
 		SendControllMessageAfterAcknowledged(res,req_id, ret)
-        accepted_response[req_id] = null
+        response_accepted[req_id] = null
 	}
 })
 
@@ -63,7 +64,7 @@ function SendControllMessageMain(res, pvid, message, args) {
         client.get("id", function(err, req_id) {
             //request情報書き込み
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
-            log("★★★message inserted★★★:" + pvid + "/" + req_id)
+            log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
     	    response_accepted[req_id] = res
         })
     })
@@ -119,13 +120,14 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
 }
 
 function SubscribeControlMessage(res,pvid) {
-	queue_response[pvid] = res
+	response_queue[pvid] = res
 
 }
 
 function AcknowledgeMain(res, pvid, req_id, tag) {
     var publisher = getPublisher()
     publisher.publish(k_name(Key_Accepted, req_id), JSON.stringify(tag))
+    res.send(res_OK)
 
 }
 //以下,mongodbを移植予定の関数群

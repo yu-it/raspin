@@ -21,15 +21,15 @@ router.get('/ping', function(req, res, next) {
   res.send(res_OK)
 });
 
-//http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
+//http://localhost:3000/raspin-api/SendToController?pvid=5&message=on&arg=1
 router.get('/SendToController', function(req, res, next) {
        logics.SendControllMessage(res,req.query.pvid ,req.query.message, req.query.arg, 100)
 });
-//http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
+//http://localhost:3000/raspin-api/SubscribeControlMessage?pvid=5
 router.get('/SubscribeControlMessage', function(req, res, next) {
       logics.SubscribeControlMessage(res, req.query.pvid)
 });
-//http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
+//http://localhost:3000/raspin-api/Acknowledge?pvid=5&ret=0&req_id=10
 router.get('/Acknowledge', function(req, res, next) {
 
       var pvid = req.query.pvid
@@ -52,8 +52,8 @@ router.get('/Acknowledge', function(req, res, next) {
       
       logics.Acknowledge(res,pvid,req_id,jsontag)
 });
-//http://localhost:3000/raspin-api/RegistControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
-router.get('/RegistControllerProvider', function(req, res, next) {
+//http://localhost:3000/raspin-api/RegisterControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
+router.get('/RegisterControllerProvider', function(req, res, next) {
   var pvname = req.query.pvname
   var queue_size = req.query.queue_size
   var message_names = req.query.message_name
@@ -85,8 +85,8 @@ router.get('/ModControllerProvider', function(req, res, next) {
   }
   logics.ModControllerProvider(res, pvid, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages})
 });
-//http://localhost:3000/raspin-api/RegistDataProvider?pvname=test_data_provider&queue_size=2000&type=num
-router.get('/RegistDataProvider', function(req, res, next) {
+//http://localhost:3000/raspin-api/RegisterDataProvider?pvname=test_data_provider&queue_size=2000&type=num
+router.get('/RegisterDataProvider', function(req, res, next) {
   var pvname = req.query.pvname
   var queue_size = req.query.queue_size
   var type = req.query.type
@@ -99,8 +99,8 @@ router.get('/DeleteProvider', function(req, res, next) {
   logics.DeleteProvider(res,pvid)
 });
 
-//http://localhost:3000/raspin-api/AddOvservationData?pvid=1&data=200
-router.get('/AddOvservationData', function(req, res, next) {
+//http://localhost:3000/raspin-api/AddObservationData?pvid=1&data=200
+router.get('/AddObservationData', function(req, res, next) {
   var pvid = req.query.pvid
   var data = req.query.data
   logics.AddOvservationData(res,pvid,data)
