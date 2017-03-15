@@ -16,9 +16,11 @@ def log(str):
 
 class logging_service_skelton:
 
+    
     def __init__(self):
         self.pvid = ""
         self.p = None
+        self.api = raspin.raspin("localhost",3000)
 
 
     def initialize(self, pvname, data_type):
@@ -41,11 +43,11 @@ class logging_service_skelton:
 
     def subprocess_function(self, data_pvid):
         while True:
-            tsp = self.retrieve_value()
-            print(tsp)
-            raspin.AddOvservationData(data_pvid, tsp)
+            val = self.retrieve_value()
+            print(val)
+            self.api.add_observation_data(data_pvid, val)
             time.sleep(1)
-            raspin.ping()
+            self.api.ping()
 
 
 
@@ -62,18 +64,23 @@ class logging_service_skelton:
 
     def main_process(self):
 
-        self.pvid = raspin.RegistControllerProvider(self.json_stopping)
+        self.pvid = self.api.register_controller_provider(
+            self.json_stopping["pvname"],
+            self.json_stopping["queue_size"],
+            self.json_stopping["available_message"])
         last_req_id = ""
         data_pv_id = ""
         while True:
-            mess = raspin.SubscribeControlMessage(self.pvid, last_req_id, 100)
+            mess = self.api.subscribe_control_message(self.pvid, 100)
             log("docs------")
             log(mess)
             if mess is None:
                 continue
             last_req_id = mess['req_id']
             if mess["message"] == "end_{pvname}_service".format(pvname=self.pvname):
-                raspin.Acknowledge(self.pvid, mess['req_id'], {"ret": "1", "u": [], "d":[self.pvid,data_pv_id ]})
+                self.api.acknowledge(self.pvid, mess['req_id'], "1", [], [self.pvid,data_pv_id ])
+                
+                ######ここまで移植#####
                 break
             else:
                 log("pvid:{pv},req_id:{req}".format(req=mess['req_id'], pv=self.pvid))
