@@ -13,7 +13,7 @@ class uvccam_service(skelton):
 
 
 
-    def __launch_process(self, data_pvid):
+    def launch_process(self, data_pvid):
 
         cmd = ["./mjpg_streamer"
         , "-i"
