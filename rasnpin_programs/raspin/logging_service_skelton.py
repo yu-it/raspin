@@ -51,7 +51,7 @@ class logging_service_skelton:
 
 
 
-    def __launch_process(self, data_pvid):
+    def launch_process(self, data_pvid):
 
         self.p = Process(target=self.subprocess_function, args=[data_pvid])
         self.p.start()
@@ -84,7 +84,7 @@ class logging_service_skelton:
                 log("pvid:{pv},req_id:{req}".format(req=mess['req_id'], pv=self.pvid))
                 if self.p is None:
                     data_pv_id = self.api.register_data_provider(self.data_pv_json["pvname"], self.data_pv_json["queue_size"], self.data_pv_json["type"])["pvid"]
-                    self.__launch_process(data_pv_id)
+                    self.launch_process(data_pv_id)
                     self.api.mod_controller_provider(self.pvid,
                                                      self.json_running["pvname"],
                                                      self.json_running["queue_size"],
