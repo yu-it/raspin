@@ -4,6 +4,7 @@
 
 from raspin.logging_service_skelton import logging_service_skelton as skelton
 from datetime import datetime 
+import subprocess
 
 
 class uvccam_service(skelton):
