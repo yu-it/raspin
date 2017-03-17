@@ -1,32 +1,57 @@
+var pug =require("pug")
 
 function log(str){
 	var d = new Date();
-var year  = d.getFullYear();
-var month = d.getMonth() + 1;
-var day   = d.getDate();
-var hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
-var min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
-var sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
-console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec + "  " + str );
+	var year  = d.getFullYear();
+	var month = d.getMonth() + 1;
+	var day   = d.getDate();
+	var hour  = ( d.getHours()   < 10 ) ? '0' + d.getHours()   : d.getHours();
+	var min   = ( d.getMinutes() < 10 ) ? '0' + d.getMinutes() : d.getMinutes();
+	var sec   = ( d.getSeconds() < 10 ) ? '0' + d.getSeconds() : d.getSeconds();
+	console.log( year + '-' + month + '-' + day + ' ' + hour + ':' + min + ':' + sec + "  " + str );
 }
 
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
 
- var pug =require("pug")
 
 var client = require('redis').createClient();
 var client_for_publish = require('redis').createClient();
+var client_for_subscribe_queue = require('redis').createClient();
+var client_for_subscribe_accepted = require('redis').createClient();
+client.flushall()
+client_for_subscribe_queue.psubscribe("queue_*")
+client_for_subscribe_accepted.psubscribe("accepted_*")
+
+var response_queue = {}
+var response_accepted = {}
+client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
+	var pvid = channel.substring(channel.indexOf("_") + 1)
+	if (pvid in response_queue) {
+		//I want to detect timeout...
+		response_queue[pvid].send(mess)	
+		response_queue[pvid] = null
+		
+	}
+})
+
+
+client_for_subscribe_accepted.on("pmessage",function(pattern, channel, ret) {
+	var req_id = channel.substring(channel.indexOf("_") + 1)
+	var res = response_accepted[req_id]
+	if (req_id in response_accepted) {
+    	//I want to detect timeout...
+		SendControllMessageAfterAcknowledged(res,req_id, ret)
+        response_accepted[req_id] = null
+	}
+})
+
 
 //client.flushall()
 
-function getSubscriber() {
-    return require('redis').createClient()
-}
 function getPublisher() {
     return client_for_publish
 }
-
 
 function SendControllMessageMain(res, pvid, message, args) {
     client.hexists("controller_provider", pvid, function(err, is_exist) {
@@ -39,41 +64,43 @@ function SendControllMessageMain(res, pvid, message, args) {
         client.get("id", function(err, req_id) {
             //request情報書き込み
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
-            log("★★★message inserted★★★:" + pvid)
-            var sub = getSubscriber()
-            sub.on("message", function(channel, ret) {
-                /////以下、リクエスト受理確認後の処理
-                log("★★★accepted★★★:" + pvid)
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
-                if (ack_data.tag.ret =="1") {
-                    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
-                        var contents = create_response_scm(ack_data.tag.u, datas)
-                        var response_text = JSON.stringify({"restype":"modify",
-                            "ctags":[contents["cpvid"],contents["chtml"]],
-                            "dtags":[contents["dpvid"],contents["dhtml"]],
-                            "del":ack_data.tag.d})
-                        res.end(response_text)
-                    })
-                } else {
-                    res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
-
-                }
-            })
-            sub.subscribe(k_name(Key_Accepted,req_id))
+            log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
+    	    response_accepted[req_id] = res
         })
     })
 }
+function SendControllMessageAfterAcknowledged(res, req_id, ret) {
+	/////以下、リクエスト受理確認後の処理
+	log("★★★accepted★★★:" + req_id)
+	res.writeHead(200, { 'Content-Type': 'application/json' });
+	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
+	if (ack_data.tag.ret =="1") {
+	    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
+		var contents = SendControllMessageCreateResponseData(ack_data.tag.u, datas)
+		var response_text = JSON.stringify({"restype":"modify",
+		    "ctags":[contents["cpvid"],contents["chtml"]],
+		    "dtags":[contents["dpvid"],contents["dhtml"]],
+		    "del":ack_data.tag.d})
+            log(response_text)
+		res.end(response_text)
+	    })
+	} else {
+	    res.end(JSON.stringify({"ret":0, "tag":ack_data.tag}));
 
-function create_response_scm(pvids, jsons) {
+	}
+
+}
+
+function SendControllMessageCreateResponseData(pvids, jsons) {
     var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
-    for (var update_idx = 0; update_idx < pvids; update_idx ++) {
+    for (var update_idx = 0; update_idx < pvids.length; update_idx ++) {
         var u_pvid =pvids[update_idx]
         var json_data = JSON.parse(jsons[update_idx])
+        if (json_data == undefined || !("ptype" in json_data)) {
+            continue
+        }
 
-        if (json_str == undefined) continue
-
-        if (json_data["ptype"] = "c") {
+        if (json_data["ptype"] == "c") {
             var amess = []
             var acount  = []
             json_data.available_message.forEach(function(mess_rec){
@@ -91,25 +118,19 @@ function create_response_scm(pvids, jsons) {
 
         }
     }
+    return response_dict
 
 }
 
 function SubscribeControlMessage(res,pvid) {
-
-    log("###subscribe " + pvid)
-    var subscriber = getSubscriber()
-    subscriber.on ("message", function(channel, ret) {
-        log("###accepted")
-        log("###" + ret)
-        res.send(ret)
-    })
-    subscriber.subscribe(k_name(Key_Queue, pvid))
+	response_queue[pvid] = res
 
 }
 
 function AcknowledgeMain(res, pvid, req_id, tag) {
     var publisher = getPublisher()
     publisher.publish(k_name(Key_Accepted, req_id), JSON.stringify(tag))
+    res.send(res_OK)
 
 }
 //以下,mongodbを移植予定の関数群
@@ -195,12 +216,12 @@ function AvailableDataProviderMain(res) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     client.hgetall(k_name(Key_Data_Provider), function (err, datas) {
         if (datas == undefined) {
-            res.send(JSON.stringify([]))
+            res.end(JSON.stringify([]))
             return
         }
         var data_array = []
         for (var k in datas) {
-            data_array(datas[k])
+            data_array.push(JSON.parse(datas[k]))
 
         }
         res.end(JSON.stringify(data_array))
@@ -214,7 +235,7 @@ function AvailableControllerProviderMain(res) {
     client.hgetall(k_name(Key_Controller_Provider),  function(err, datas) {
         var data_array = []
         for (var k in datas) {
-            data_array.push(datas[k])
+            data_array.push(JSON.parse(datas[k]))
 
         }
         res.end(JSON.stringify(data_array))
@@ -258,6 +279,7 @@ function DeleteProviderMain (res, id) {
 function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
     var ret = []
     var processed = 0
+    res.writeHead(200, { 'Content-Type': 'application/json' });
     for (var i = 0; i <  pvid_ary.length; i++) {
         var pvid = pvid_ary[i]
         var previous_gotten_data_id = previous_gotten_data_id_ary[i]
@@ -267,12 +289,16 @@ function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
 
         }
         client.zrangebyscore(k_name(Key_Data,pvid), previous_gotten_data_id,Infinity, "withscores", function(err, val) {
+            if (val == undefined) {
+                processed ++
+                return
+            }
             for (var j = 0; j < val.length; j += 2) {
                 ret.push({"data_id" : val[j + 1], "data" : val[j].substring(val[j].indexOf("-") + 1), "pvid":this.args[0].substring("data_".length)})
             }
             processed ++
             if (processed >= pvid_ary.length) {
-                res.send(JSON.stringify(ret))
+                res.end(JSON.stringify(ret))
             }
         })
 

@@ -4,62 +4,81 @@ import urllib2
 import json
 import pymongo
 
-client = pymongo.MongoClient('localhost', 27017)
-db = client.test
-api_template = "http://localhost:3000/raspin-api/{query}"
+class api:
 
+    #serverにはサーバ名またはIP,portにはポート番号
+    def __init__(self, server, port):
+        #http://localhost:3000
+        self.api_template = "http://" + server + ":" + str(port) + "/raspin-api/{query}"
+        self.ping()
 
-def ping():
-    try:
-        ping = call_api_get("ping")
-        log(ping)
-    except Exception as ex:
-        message = "raspin-api 接続エラーが発生しました。" + str(ex)
-        log(message)
-        raise Exception(message)
+    def __call_api_get(self, path):
 
+        return self.__http_get(self.api_template.format(query = path))
 
-def log(message):
-    print(message)
+    def __http_get(self, url):
+        self.__log (url)
+        r = urllib2.urlopen(url)
+        res = r.read()
+        return json.loads(res)
 
+    def __log(self, message):
+        print(message)
 
-def httpget(url):
-    log (url)
-    r = urllib2.urlopen(url)
-    res = r.read()
-    return json.loads(res)
+    def ping(self):
+        try:
+            ping = self.__call_api_get("ping")
+            self.__log(ping)
+        except Exception as ex:
+            message = "raspin-api 接続エラーが発生しました。" + str(ex)
+            self.__log(message)
+            raise Exception(message)
 
+    def subscribe_control_message(self, pvid, timeout_second):
+        query = 'SubscribeControlMessage?pvid={pvid}'.format(pvid = pvid)
+        try:
+            return self.__call_api_get(query)
+        except Exception as ex:
+            raise ex
 
-def call_api_get(path):
-    return httpget(api_template.format(query = path))
+    def add_observation_data(self, pvid, data):
+        query = 'AddObservationData?pvid={pvid}&data={data}'.format(pvid = pvid, data = urllib2.quote(str(data)))
+        self.__call_api_get(query)
 
-ping()
+    def register_controller_provider_old(self, json_definition):
+        return self.regist_controller_provider(json_definition["pvname"], json_definition["queue_size"], json_definition["available_message"]  )
 
-def SubscribeControlMessage(pvid, previous_processed_req_id, timeout_second):
+    def register_controller_provider(self, pv_name, queue_size, available_messages):
+        query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&".format(pv_name=urllib2.quote(pv_name),queue_size=queue_size)
+        msgs = []
+        for message in available_messages:
+            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
+        query += "&".join(msgs)
+        return self.__call_api_get(query)
 
-    query = 'SubscribeControlMessage?pvid={pvid}&previous_processed_req_id={ppreq}'.format(pvid = pvid, ppreq = previous_processed_req_id)
-    r = None
-    try:
-        return call_api_get(query)
-    except Exception as ex:
-        raise ex
-    finally:
-        if r <> None:
-            r.close()
+    def register_data_provider(self,pvname, queue_size, type):
+        query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}".format(pv_name=urllib2.quote(pvname),queue_size=queue_size,type=type)
+        return self.__call_api_get(query)
 
-def AddOvservationData(pvid, data):
-    db.system_js.AddOvservationData(pvid, data)
-def RegistControllerProvider(json_definition):
-    return db.system_js.RegistControllerProvider(json_definition)
+    def mod_controller_provider(self, pvid, pv_name, queue_size, available_messages):
+        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=urllib2.quote(pv_name),queue_size=queue_size)
+        msgs = []
+        for message in available_messages:
+            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
+        query += "&".join(msgs)
+        return self.__call_api_get(query)
 
-def RegistDataProvider(json_definition):
-    return db.system_js.RegistDataProvider(json_definition)
+    def acknowledge(self,pvid, req_id, ret, u, d):
+        query = "Acknowledge?pvid={pvid}&req_id={reqid}&ret={ret}&".format(pvid=pvid,reqid=req_id,ret=ret)
+        umsgs = []
+        for update in u:
+            umsgs.append("u={u}".format(u=update))
 
-def ModControllerProvider(id, json_definition):
-    db.system_js.ModControllerProvider(id, json_definition)
+        for de in d:
+            umsgs.append("d={d}".format(d=de))
+        query += "&".join(umsgs)
+        return self.__call_api_get(query)
 
-def Acknowledge(id, req_id, tag):
-    db.system_js.Acknowledge(id, req_id, tag)
-
-def DeleteProvider(pvid):
-    db.system_js.DeleteProvider(pvid)
+    def delete_provider(self,pvid):
+        query = "DeleteProvider?pvid={pvid}".format(pvid=pvid)
+        return self.__call_api_get(query)
