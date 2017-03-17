@@ -4,18 +4,6 @@ var router = express.Router();
 
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
-function call_stored_procedure(db,func) {
-  
-  // Connection URL
-  var url = 'mongodb://localhost:27017/test';
-  db.eval('db.loadServerScripts()',
-    //err
-    function(err,seq) {
-      func(err,seq,db);
-    }
-  )
-
-}
 //http://localhost:3000/raspin-api/ping
 router.get('/ping', function(req, res, next) {
   res.send(res_OK)
