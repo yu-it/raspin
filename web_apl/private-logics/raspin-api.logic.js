@@ -13,6 +13,8 @@ function log(str){
 
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
+var res_TIMEOUT = JSON.stringify({"ret":"to"})
+var timeout_limit = 10000
 
 
 var client = require('redis').createClient();
