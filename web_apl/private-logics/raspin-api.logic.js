@@ -87,6 +87,11 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 	log("★★★accepted★★★:" + req_id)
 	res.writeHead(200, { 'Content-Type': 'application/json' });
 	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
+   if (ack_data == res_TIMEOUT) {
+      res.send(res_TIMEOUT)
+      return
+   }
+
 	if (ack_data.tag.ret =="1") {
 	    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
 		var contents = SendControllMessageCreateResponseData(ack_data.tag.u, datas)
