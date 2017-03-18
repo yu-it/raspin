@@ -14,7 +14,7 @@ function log(str){
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
 var res_TIMEOUT = JSON.stringify({"ret":"to"})
-var timeout_limit = 10000
+var Timeout_limit = 10000
 
 
 var client = require('redis').createClient();
@@ -68,6 +68,9 @@ function SendControllMessageMain(res, pvid, message, args) {
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
             log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
     	    response_accepted[req_id] = res
+         setTimeout(function(){
+           console.log("setTimeout内の`this` is 何", this);
+         },Timeout_limit);
         })
     })
 }
