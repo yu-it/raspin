@@ -29,7 +29,7 @@ var response_queue = {}
 var response_accepted = {}
 client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
-	if (pvid in response_queue) {
+	if (response_queue[pvid]) {
 		//I want to detect timeout...
 		response_queue[pvid].send(mess)	
 		response_queue[pvid] = null
@@ -41,7 +41,7 @@ client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 client_for_subscribe_accepted.on("pmessage",function(pattern, channel, ret) {
 	var req_id = channel.substring(channel.indexOf("_") + 1)
 	var res = response_accepted[req_id]
-	if (req_id in response_accepted) {
+	if (response_accepted[req_id]) {
     	//I want to detect timeout...
 		SendControllMessageAfterAcknowledged(res,req_id, ret)
         response_accepted[req_id] = null
