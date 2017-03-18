@@ -74,7 +74,8 @@ class logging_service_skelton:
             mess = self.api.subscribe_control_message(self.pvid, 100)
             log("docs------")
             log(mess)
-            if mess is None:
+            if mess["ret"] == "to":
+                log("timeout")
                 continue
             if mess["message"] == "end_{pvname}_service".format(pvname=self.pvname):
                 self.api.acknowledge(self.pvid, mess['req_id'], "1", [], [self.pvid,data_pv_id ])

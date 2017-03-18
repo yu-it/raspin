@@ -9,7 +9,7 @@ router.get('/ping', function(req, res, next) {
   res.send(res_OK)
 });
 
-//http://localhost:3000/raspin-api/SendToController?pvid=5&message=on&arg=1
+//http://localhost:3000/raspin-api/SendToController?pvid=1&message=on&arg=1
 router.get('/SendToController', function(req, res, next) {
        logics.SendControllMessage(res,req.query.pvid ,req.query.message, req.query.arg, 100)
 });
@@ -17,7 +17,7 @@ router.get('/SendToController', function(req, res, next) {
 router.get('/SubscribeControlMessage', function(req, res, next) {
       logics.SubscribeControlMessage(res, req.query.pvid)
 });
-//http://localhost:3000/raspin-api/Acknowledge?pvid=5&ret=0&req_id=10
+//http://localhost:3000/raspin-api/Acknowledge?pvid=1&ret=0&req_id=10
 router.get('/Acknowledge', function(req, res, next) {
 
       var pvid = req.query.pvid

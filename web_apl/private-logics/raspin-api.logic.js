@@ -14,7 +14,7 @@ function log(str){
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
 var res_TIMEOUT = JSON.stringify({"ret":"to"})
-var Timeout_limit = 10000
+var Timeout_limit = 60000
 
 
 var client = require('redis').createClient();
@@ -30,13 +30,15 @@ var response_accepted = {}
 client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
 	if (response_queue[pvid]) {
-		//I want to detect timeout...
-		response_queue[pvid].send(mess)	
-		response_queue[pvid] = null
+        mess = JSON.parse(mess)
+        mess["ret"] = "ok"
+        response_queue[pvid].send(JSON.stringify(mess))
+		//response_queue[pvid] = null
+        delete response_queue[pvid] 
 		
 	} else {
-var publisher = getPublisher()
- publisher.publish(k_name(Key_Accepted, mess.req_id), JSON.stringify(res_NG))
+		var publisher = getPublisher()
+        publisher.publish(k_name(Key_Accepted, JSON.parse(mess)["req_id"]), JSON.stringify(res_NG))
    }
 })
 
@@ -45,9 +47,9 @@ client_for_subscribe_accepted.on("pmessage",function(pattern, channel, ret) {
 	var req_id = channel.substring(channel.indexOf("_") + 1)
 	var res = response_accepted[req_id]
 	if (response_accepted[req_id]) {
-    	//I want to detect timeout...
 		SendControllMessageAfterAcknowledged(res,req_id, ret)
-        response_accepted[req_id] = null
+        //response_accepted[req_id] = null
+        delete response_accepted[req_id] 
 	}
 })
 
@@ -71,14 +73,14 @@ function SendControllMessageMain(res, pvid, message, args) {
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
             log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
     	    response_accepted[req_id] = res
-         setTimeout(function(){
-           if (response_accepted[req_id]) {
-             response_accepted[req_id].send(res_TIMEOUT)
-             response_accepted[req_id] = null
-           
-             log("send control timeout");
-           }
-         },Timeout_limit);
+            setTimeout(function(){
+                if (response_accepted[req_id]) {
+                    response_accepted[req_id].send(res_TIMEOUT)
+                    delete response_accepted[req_id]
+            
+                    log("send control timeout");
+                }
+            },Timeout_limit);
         })
     })
 }
@@ -88,7 +90,7 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 	res.writeHead(200, { 'Content-Type': 'application/json' });
 	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
    if (ack_data == res_NG) {
-      res.send(res_NG)
+      res.end(res_NG)
       return
    }
 
@@ -143,12 +145,13 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
 function SubscribeControlMessage(res,pvid) {
 	response_queue[pvid] = res
    setTimeout(function(){
-     if (response_queue[pvid] {
-       response_queue[pvid].send(res_TIMEOUT)
-       response_queue[pvid] = null
+       if (response_queue[pvid]) {
+           response_queue[pvid].send(res_TIMEOUT)
+           //response_queue[pvid] = null
+           delete response_queue[pvid]
            
-       log("sbscribe timeout");
-     }
+           log("sbscribe timeout");
+       } 
     },Timeout_limit);
    
 }
