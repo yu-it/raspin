@@ -69,7 +69,12 @@ function SendControllMessageMain(res, pvid, message, args) {
             log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
     	    response_accepted[req_id] = res
          setTimeout(function(){
-           console.log("setTimeout内の`this` is 何", this);
+           if (response_accepted[req_id]) {
+             response_accepted[req_id].send(res_TIMEOUT)
+             response_accepted[req_id] = null
+           
+             log("send control timeout");
+           }
          },Timeout_limit);
         })
     })
@@ -129,7 +134,15 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
 
 function SubscribeControlMessage(res,pvid) {
 	response_queue[pvid] = res
-
+   setTimeout(function(){
+     if (response_queue[pvid] {
+       response_queue[pvid].send(res_TIMEOUT)
+       response_queue[pvid] = null
+           
+       log("sbscribe timeout");
+     }
+    },Timeout_limit);
+   
 }
 
 function AcknowledgeMain(res, pvid, req_id, tag) {
