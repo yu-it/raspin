@@ -36,7 +36,7 @@ client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 		
 	} else {
 var publisher = getPublisher()
- publisher.publish(k_name(Key_Accepted, mess.req_id), JSON.stringify(res_TIMEOUT))
+ publisher.publish(k_name(Key_Accepted, mess.req_id), JSON.stringify(res_NG))
    }
 })
 
@@ -87,8 +87,8 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 	log("★★★accepted★★★:" + req_id)
 	res.writeHead(200, { 'Content-Type': 'application/json' });
 	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
-   if (ack_data == res_TIMEOUT) {
-      res.send(res_TIMEOUT)
+   if (ack_data == res_NG) {
+      res.send(res_NG)
       return
    }
 
