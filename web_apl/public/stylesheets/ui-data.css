@@ -11,14 +11,11 @@
 .d_type_message{
    
 }
-.unit {
-    font-size: 12pt;
-
-}
 
 div.pv_d{
     margin :2% 2% 2% 2%;
     height:300px;
+    width:340px;
     padding: 5px;
     background-color: #FFFFFF;
 
@@ -31,4 +28,12 @@ div.default.message.contents{
 }
 .video.contents{
     margin :1%;
+}
+.num.contents{
+    font-size: 84pt;
+
+}
+.default.unit {
+    font-size: 24pt;
+
 }

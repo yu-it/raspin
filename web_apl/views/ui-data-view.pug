@@ -18,9 +18,9 @@ html
    
    case type
      when "num"
-       div&attributes({"style":"text-align:right;"})
-        span.contents 
-        span.unit #{unit} 
+       div&attributes({"style":"text-align:right;vertical-align:bottom;display:table-cell;width:320px;height:240px;"})
+        span&attributes({"class":"num contents "  + layout_class})
+        span&attributes({"class":"num unit "  + layout_class}) #{unit} 
        
      when "video"
        img&attributes({"class":"video contents "  + layout_class})(src="http://192.168.2.123:8080/?action=stream")
