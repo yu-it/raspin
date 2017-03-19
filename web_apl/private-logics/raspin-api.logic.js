@@ -136,7 +136,7 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
             response_dict["clayout_param"].push(json_data["layout_param"])
 
         } else {
-            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type, layout_param: json_data["layout_param"]})
+            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type, layout_param: json_data["layout_param"], unit:json_data["unit"]})
             response_dict["dhtml"].push(html_contents)
             response_dict["dpvid"].push(u_pvid)
             response_dict["dlayout_param"].push(json_data["layout_param"])
@@ -241,6 +241,10 @@ function RegistDataProviderMain (res, DataDesc) {
         DataDesc["ptype"] = "d"
         if (!("layout_param" in DataDesc)) {
             DataDesc["layout_param"] = Default_layout_param_data
+
+        }
+        if (!("unit" in DataDesc)) {
+            DataDesc["unit"] = "-"
 
         }
 

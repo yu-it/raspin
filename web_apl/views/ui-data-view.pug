@@ -4,13 +4,25 @@ html
    style
     include ../public/stylesheets/ui-data.css
   script(src="javascripts/ui-data.client.js")
-  div.pv_base&attributes({'id':pvid, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param})
-   p #{pvid}
+  - var layout_class = layout_param.split("@")[0].split("-")[0]
+  - var css_class = "pv_base pv_d d_type_" + type + " " + layout_class
+  - if (type == "num") {
+  -   css_class += " num"
+  -} else if (type == "message") {
+  -   css_class += " message"  
+  -} else if (type == "video") {
+  -   css_class += " video"  
+  -}
+  div&attributes({'id':pvid, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param, 'class': css_class, 'unit':unit})
+   p&attributes({"class":"caption "  + layout_class}) #{pvname}
+   
    case type
      when "num"
-       p.contents 
+       div&attributes({"style":"text-align:right;"})
+        span.contents 
+        span.unit #{unit} 
+       
      when "video"
        img(src="http://192.168.2.123:8080/?action=stream")
      when "message"
-       p.contents
-   br
+       div&attributes({"class":"message contents "  + layout_class})

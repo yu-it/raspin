@@ -1,0 +1,30 @@
+.d_type_num{
+    color:#888888;
+    font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
+    font-size: 24pt;
+    padding:2%;
+   
+}
+.d_type_video{
+    width:30%;
+   
+}
+.d_type_message{
+   
+}
+.unit {
+    font-size: 12pt;
+
+}
+
+div.pv_d{
+    padding: 5px;
+    background-color: #FFFFFF;
+
+}
+div.default.message.contents{
+    padding: 5px;
+    display: block;
+    height:10vh;
+    overflow: scroll;
+}

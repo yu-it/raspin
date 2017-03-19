@@ -13,7 +13,7 @@ class cpu_service(skelton):
 
 if __name__ == "__main__":
     service = cpu_service()
-    service.initialize("cpu-usage", "num")
+    service.initialize("cpu-usage", "num", "%")
     service.main_process()
 
 

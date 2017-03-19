@@ -16,26 +16,33 @@ def log(str):
 
 class logging_service_skelton:
 
-    
     def __init__(self):
         self.pvid = ""
         self.p = None
         self.api = raspin.api("localhost",3000)
 
-
-    def initialize(self, pvname, data_type):
+    def initialize(self, pvname, data_type, unit = "-"):
         self.pvname = pvname
         self.data_type = data_type
+
+        #self.json_stopping = {"pvname": pvname, "queue_size": QUEUE_SIZE,"layout_param":"default-controller@command console",
+        #                 "available_message": [{"message_name": "on", "arg": 1},
+        #                                       {"message_name": "end".format(pvname=pvname),
+        #                                        "arg": 1}]}
+
+        #self.json_running = {"pvname": pvname, "queue_size": QUEUE_SIZE,"layout_param":"default-controller@command console",
+        #                "available_message": [{"message_name": "off", "arg": 1},
+        #                                      {"message_name": "end".format(pvname=pvname),
+        #                                       "arg": 1}]}
         self.json_stopping = {"pvname": pvname, "queue_size": QUEUE_SIZE,
-                         "available_message": [{"message_name": "on", "arg": 1},
-                                               {"message_name": "end_{pvname}_service".format(pvname=pvname),
-                                                "arg": 1}]}
+                              "layout_param": "default-controller@command console",
+                              "available_message": [{"message_name": "on", "arg": 1}]}
 
         self.json_running = {"pvname": pvname, "queue_size": QUEUE_SIZE,
-                        "available_message": [{"message_name": "off", "arg": 1},
-                                              {"message_name": "end_{pvname}_service".format(pvname=pvname),
-                                               "arg": 1}]}
-        self.data_pv_json = {"pvname": "{pvname}_streamer".format(pvname = pvname), "queue_size": QUEUE_SIZE, "type": data_type}
+                             "layout_param": "default-controller@command console",
+                             "available_message": [{"message_name": "off", "arg": 1}]}
+
+        self.data_pv_json = {"pvname": "{pvname}".format(pvname = pvname),"layout_param":"default-data@basic data", "queue_size": QUEUE_SIZE, "type": data_type, "unit": unit}
 
 
     def retrieve_value(self):
@@ -67,7 +74,8 @@ class logging_service_skelton:
         self.pvid = self.api.register_controller_provider(
             self.json_stopping["pvname"],
             self.json_stopping["queue_size"],
-            self.json_stopping["available_message"])["pvid"]
+            self.json_stopping["available_message"],
+            self.json_stopping["layout_param"])["pvid"]
         last_req_id = ""
         data_pv_id = ""
         while True:
@@ -84,12 +92,13 @@ class logging_service_skelton:
             else:
                 log("pvid:{pv},req_id:{req}".format(req=mess['req_id'], pv=self.pvid))
                 if self.p is None:
-                    data_pv_id = self.api.register_data_provider(self.data_pv_json["pvname"], self.data_pv_json["queue_size"], self.data_pv_json["type"])["pvid"]
+                    data_pv_id = self.api.register_data_provider(self.data_pv_json["pvname"], self.data_pv_json["queue_size"], self.data_pv_json["type"], self.data_pv_json["unit"], self.data_pv_json["layout_param"])["pvid"]
                     self.launch_process(data_pv_id)
                     self.api.mod_controller_provider(self.pvid,
                                                      self.json_running["pvname"],
                                                      self.json_running["queue_size"],
-                                                     self.json_running["available_message"]
+                                                     self.json_running["available_message"],
+                                                     self.json_running["layout_param"]
                                                      )
                     self.api.acknowledge(self.pvid, mess['req_id'], "1", [self.pvid,data_pv_id ], [])
 
@@ -99,7 +108,8 @@ class logging_service_skelton:
                     self.api.mod_controller_provider(self.pvid,
                                                      self.json_stopping["pvname"],
                                                      self.json_stopping["queue_size"],
-                                                     self.json_stopping["available_message"]
+                                                     self.json_stopping["available_message"],
+                                                     self.json_stopping["layout_param"]
                                                      )
                     self.api.acknowledge(self.pvid, mess['req_id'], "1",  [self.pvid],[data_pv_id])
                     data_pv_id = ""

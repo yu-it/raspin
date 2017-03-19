@@ -89,13 +89,16 @@ router.get('/RegisterDataProvider', function(req, res, next) {
   var pvname = req.query.pvname
   var queue_size = req.query.queue_size
   var type = req.query.type
-
+  var datadesc = {"pvname": pvname, "queue_size": queue_size,"type": type}
   if ("layout_param" in req.query) {
-      logics.RegistDataProvider(res, {"pvname": pvname, "queue_size": queue_size,"type": type, "layout_param": req.query.layout_param})
-  } else {
-      logics.RegistDataProvider(res, {"pvname": pvname, "queue_size": queue_size,"type": type})
-
+      datadesc["layout_param"] = req.query.layout_param
   }
+  if ("unit" in req.query) {
+      datadesc["unit"] = req.query.unit
+  }
+
+  logics.RegistDataProvider(res, datadesc)
+
 });
 //http://localhost:3000/raspin-api/DeleteProvider?pvid=2
 router.get('/DeleteProvider', function(req, res, next) {

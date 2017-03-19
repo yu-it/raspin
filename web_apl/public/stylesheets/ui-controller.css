@@ -38,6 +38,8 @@ div.direction{
 }
 
 div.pv_base{
-    border-style:solid;
+  word-wrap: nowrap;
+  padding: 5px;
+  background-color: #FFFFFF;
 }
 

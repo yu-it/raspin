@@ -44,11 +44,12 @@ function update_ui(res) {
         for (var i = 0; i < res.ctags[0].length; i++) {
         	if ($("#container_" + res.ctags[0][i]).length == 0) {
                 var lay_param = res.ctags[2][i]
-                if ($("." + lay_param).length == 0) {
-                    $("#main").append('<div id="' + lay_param + '" class="' + lay_param + '"></div>')
+                var lay_id = lay_param2lay_id(lay_param)
+                if ($("#" + lay_id).length == 0) {
+                    $("#main").append(container_tags(lay_param))
                     
                 }
-                $("." + lay_param).append('<div id=container_' + res.ctags[0][i] + '></div>')
+                $("#" + lay_id + "_body").append('<div id=container_' + res.ctags[0][i] + '></div>')
         	}
 		    $("#container_" + res.ctags[0][i]).html(res.ctags[1][i])
 		
@@ -56,11 +57,19 @@ function update_ui(res) {
         for (var i = 0; i < res.dtags[0].length; i++) {
         	if ($("#container_" + res.dtags[0][i]).length == 0) {
                 var lay_param = res.dtags[2][i]
-                if ($("." + lay_param).length == 0) {
-                    $("#main").append('<div id="' + lay_param + '" class="' + lay_param + '"></div>')
+                var lay_id =lay_param2lay_id(lay_param)
+                if ($("#" + lay_id).length == 0) {
+                    $("#main").append(container_tags(lay_param))
                     
                 }
-                $("." + lay_param).append('<div id=container_' + res.dtags[0][i] + '></div>')
+                var obj = $(res.dtags[1][i])
+                if (obj.find(".message").length > 0) {
+                    $("#" + lay_id + "_footer").append('<div id=container_' + res.dtags[0][i] + '></div>')
+
+                } else {
+                    $("#" + lay_id + "_body").append('<div id=container_' + res.dtags[0][i] + '></div>')
+
+                }
         	}
 		    $("#container_" + res.dtags[0][i]).html(res.dtags[1][i])
 		    

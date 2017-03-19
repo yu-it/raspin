@@ -48,20 +48,23 @@ class api:
     def register_controller_provider_old(self, json_definition):
         return self.regist_controller_provider(json_definition["pvname"], json_definition["queue_size"], json_definition["available_message"]  )
 
-    def register_controller_provider(self, pv_name, queue_size, available_messages):
-        query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&".format(pv_name=urllib2.quote(pv_name),queue_size=queue_size)
+    def register_controller_provider(self, pv_name, queue_size, available_messages,layout_param="default"):
+        layout_param=urllib2.quote(layout_param)
+        query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&layout_param={lay_param}&".format(pv_name=urllib2.quote(pv_name),queue_size=queue_size,lay_param=layout_param)
         msgs = []
         for message in available_messages:
             msgs.append("message_name={message}&arg={arg}".format(message=urllib2.quote(message["message_name"]), arg=message["arg"]))
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
-    def register_data_provider(self,pvname, queue_size, type):
-        query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}".format(pv_name=urllib2.quote(pvname),queue_size=queue_size,type=type)
+    def register_data_provider(self,pvname, queue_size, type, unit,layout_param="default"):
+        layout_param = urllib2.quote(layout_param)
+        query = "RegisterDataProvider?pvname={pv_name}&queue_size={queue_size}&type={type}&unit={unit}&layout_param={lay_param}".format(pv_name=urllib2.quote(pvname),queue_size=queue_size,type=type,unit=unit,lay_param=layout_param)
         return self.__call_api_get(query)
 
-    def mod_controller_provider(self, pvid, pv_name, queue_size, available_messages):
-        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=urllib2.quote(pv_name),queue_size=queue_size)
+    def mod_controller_provider(self, pvid, pv_name, queue_size, available_messages,layout_param="default"):
+        layout_param = urllib2.quote(layout_param)
+        query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&layout_param={lay_param}&".format(pvid=pvid,pv_name=urllib2.quote(pv_name),queue_size=queue_size,lay_param=layout_param)
         msgs = []
         for message in available_messages:
             msgs.append("message_name={message}&arg={arg}".format(message=urllib2.quote(message["message_name"]), arg=message["arg"]))
