@@ -32,7 +32,7 @@ function update_logging_data() {
                         view.attr("previous_processed_data_id",entry.data_id)
 
                     } else if (view.attr("data_type") == "video") {
-                    } else if (view.attr("data_type")    == "message") {
+                    } else if (view.attr("data_type") == "message") {
                         var existing_text = view.find(".contents").html()
                         var index = -1
                         for (var i = 0; i < str_count(existing_text,"<br>") - 10; i++) {

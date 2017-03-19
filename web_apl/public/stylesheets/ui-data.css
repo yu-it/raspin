@@ -13,16 +13,21 @@
 }
 
 div.pv_d{
-    margin :2% 2% 2% 2%;
+    margin :5px;
     height:300px;
     width:340px;
     padding: 5px;
     background-color: #FFFFFF;
 
 }
+div.pv_d.message {
+    width:auto !important;
+    height:15vh !important;
+}
 div.default.message.contents{
     padding: 5px;
     display: block;
+    width:auto !important;
     height:10vh;
     overflow: scroll;
 }
