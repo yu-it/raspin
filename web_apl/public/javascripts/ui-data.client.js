@@ -2,7 +2,7 @@ routine_process()
 routine_process_is_functioning = false
 function routine_process() {
     routine_process_is_functioning = true
-    if ( $(".field_data").find(".pv_base").length == 0) {
+    if ( $("#main").find(".pv_base[data_type]").length == 0) {
         routine_process_is_functioning = false
         return
     }
@@ -12,7 +12,7 @@ function routine_process() {
     }, 1000);
 }
 function update_logging_data() {
-    var data_views = $(".field_data").find(".pv_base");
+    var data_views = $("#main").find(".pv_base[data_type]");
     var urlstr = "raspin-api/GetOvservationData?"
     for(var i=0; i < data_views.length; i++) {
         var view = data_views.eq(i);

@@ -43,13 +43,13 @@ function create_each_controller_ui(entry) {
       entry.available_message.forEach(
         function (mess) {
           urlstring += "&available_message=" + mess.message_name
-          urlstring += "&arg_count=" + mess.arg_count
+          urlstring += "&arg=" + mess.arg
           
         })
 
     } else {
       urlstring += "&available_message=" + entry.available_message.message_name
-      urlstring += "&arg_count=" + entry.available_message.arg_count
+      urlstring += "&arg=" + entry.available_message.arg
     }
     $.ajax(
     {
@@ -58,7 +58,12 @@ function create_each_controller_ui(entry) {
       async:false ,
       success :
       function(msg) {
-          $(".field_controller").append('<div id=container_' + entry.pvid + '></div>')
+          var lay_param = entry["layout_param"]
+          if ($("." + lay_param).length == 0) {
+              $("#main").append('<div id="' + lay_param + '" class="' + lay_param + '"></div>')
+            
+          }
+          $("." + lay_param).append('<div id=container_' + entry.pvid + '></div>')
           $("#container_" + entry.pvid).html(msg)
       },
       err :function(e) {
@@ -77,7 +82,12 @@ function create_each_data_ui(entry) {
       async:false ,
       success :
       function(msg) {
-          $(".field_data").append('<div id=container_' + entry.pvid + '></div>')
+          var lay_param = entry["layout_param"]
+          if ($("." + lay_param).length == 0) {
+              $("#main").append('<div id="' + lay_param + '" class="' + lay_param + '"></div>')
+            
+          }
+          $("." + lay_param).append('<div id=container_' + entry.pvid + '></div>')
           $("#container_" + entry.pvid).html(msg)
       },
       err :function(e) {

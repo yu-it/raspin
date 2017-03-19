@@ -101,8 +101,8 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 	    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
 		var contents = SendControllMessageCreateResponseData(ack_data.tag.u, datas)
 		var response_text = JSON.stringify({"restype":"modify",
-		    "ctags":[contents["cpvid"],contents["chtml"]],
-		    "dtags":[contents["dpvid"],contents["dhtml"]],
+		    "ctags":[contents["cpvid"],contents["chtml"],contents["clayout_param"]],
+		    "dtags":[contents["dpvid"],contents["dhtml"],contents["dlayout_param"]],
 		    "del":ack_data.tag.d})
             log(response_text)
 		res.end(response_text)
@@ -115,7 +115,7 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 }
 
 function SendControllMessageCreateResponseData(pvids, jsons) {
-    var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
+    var response_dict = {"cpvid":[], "chtml":[], "clayout_param":[], "dpvid":[], "dhtml":[], "dlayout_param":[]}
     for (var update_idx = 0; update_idx < pvids.length; update_idx ++) {
         var u_pvid =pvids[update_idx]
         var json_data = JSON.parse(jsons[update_idx])
@@ -133,11 +133,13 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
             var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg: acount, layout_param: json_data["layout_param"]})
             response_dict["chtml"].push(html_contents)
             response_dict["cpvid"].push(u_pvid)
+            response_dict["clayout_param"].push(json_data["layout_param"])
 
         } else {
             var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type, layout_param: json_data["layout_param"]})
             response_dict["dhtml"].push(html_contents)
             response_dict["dpvid"].push(u_pvid)
+            response_dict["dlayout_param"].push(json_data["layout_param"])
 
         }
     }
