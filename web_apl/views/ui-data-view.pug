@@ -4,19 +4,13 @@ html
    style
     include ../public/stylesheets/ui-data.css
   script(src="javascripts/ui-data.client.js")
-  - var controller_id =  "area_" + pvid
-  div.pv_base&attributes({'id':controller_id, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param})
+  div.pv_base&attributes({'id':pvid, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param})
    p #{pvid}
    case type
      when "num"
-       - var num_id = "num_" + pvid
-       p&attributes({'id':num_id, }) #{layout_param}
+       p.contents 
      when "video"
-       - var num_id = "video_" + pvid
        img(src="http://192.168.2.123:8080/?action=stream")
      when "message"
-       - var num_id = "message_" + pvid
-       p&attributes({'id':num_id, }) #{layout_param}
-     default
-       button.com&attributes({'pvid':pvid})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
-  br
+       p.contents
+   br

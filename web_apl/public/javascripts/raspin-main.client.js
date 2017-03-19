@@ -58,8 +58,8 @@ function create_each_controller_ui(entry) {
       async:false ,
       success :
       function(msg) {
-          $(".field_controller").append('<div id="' + entry.pvid + '"></div>')
-          $("#" + entry.pvid).html(msg)
+          $(".field_controller").append('<div id=container_' + entry.pvid + '></div>')
+          $("#container_" + entry.pvid).html(msg)
       },
       err :function(e) {
         alert("err")
@@ -77,8 +77,8 @@ function create_each_data_ui(entry) {
       async:false ,
       success :
       function(msg) {
-          $(".field_data").append('<div id="' + entry.pvid + '"></div>')
-          $("#" + entry.pvid).html(msg)
+          $(".field_data").append('<div id=container_' + entry.pvid + '></div>')
+          $("#container_" + entry.pvid).html(msg)
       },
       err :function(e) {
         alert("err")

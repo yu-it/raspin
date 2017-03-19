@@ -26,14 +26,15 @@ function update_logging_data() {
             var htm = ""
             if (Array.isArray(msg)) {
                 msg.forEach(function(entry){
-                    if ($("#num_" + entry.pvid).length) {
-                        $("#num_" + entry.pvid).html(entry.data)
-                        $("#area_" + entry.pvid).attr("previous_processed_data_id",entry.data_id)
+                    var view = $("#" + entry.pvid)
+                    if (view.attr("data_type") == "num") {
+                        view.find(".contents").html(entry.data)
+                        view.attr("previous_processed_data_id",entry.data_id)
 
-                    } else if ($("#video_" + entry.pvid).length) {
-                    } else if ($("#message_" + entry.pvid).length) {
-                        $("#message_" + entry.pvid).text(entry.data)
-                        $("#area_" + entry.pvid).attr("previous_processed_data_id",entry.data_id)
+                    } else if (view.attr("data_type") == "video") {
+                    } else if (view.attr("data_type")    == "message") {
+                        view.find(".contents").html(view.find(".contents").html() + "<br/>" + entry.data)
+                        view.attr("previous_processed_data_id",entry.data_id)
                     }
                 })
             }

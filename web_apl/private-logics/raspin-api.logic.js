@@ -352,15 +352,17 @@ function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
     
 }
 function AddOvservationDataMain(res, pvid, data) {
-    client.hexists("data_provider", pvid, function(err, is_exist) {
-        if (is_exist == 0) {
+    client.hget("data_provider", pvid, function(err, is_exist) {
+        if (is_exist == undefined) {
             res.send(res_NG)
             return
         }
+        is_exist = JSON.parse(is_exist)
 
         client.incr(k_name(Key_Data_Number))
         client.get(k_name(Key_Data_Number), function(err, val) {
             client.zadd(k_name(Key_Data, pvid), val, val + "-" + data)
+            var c = client.zremrangebyrank(k_name(Key_Data, pvid), 0, is_exist["queue_size"] * -1)
             res.send(res_OK)
         })
     })

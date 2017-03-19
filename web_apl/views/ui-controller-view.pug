@@ -4,8 +4,7 @@ html
    style
     include ../public/stylesheets/ui-controller.css
   script(src="javascripts/ui-controller.client.js")
-  - var controller_id =  "area_" + pvid
-  div.pv_base&attributes({'id':controller_id, 'pvid':pvid, 'layout_param':layout_param})
+  div.pv_base&attributes({'id':pvid, 'pvid':pvid, 'layout_param':layout_param})
    p #{pvid}
    each val, index in available_message
      - var val_class = val.substring(0,4)

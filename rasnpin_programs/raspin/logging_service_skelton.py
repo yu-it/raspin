@@ -4,7 +4,7 @@ import time
 import raspin
 from datetime import datetime
 from multiprocessing import Process
-
+QUEUE_SIZE = 15
 
 def timestp():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -26,16 +26,16 @@ class logging_service_skelton:
     def initialize(self, pvname, data_type):
         self.pvname = pvname
         self.data_type = data_type
-        self.json_stopping = {"pvname": pvname, "queue_size": 5000,
+        self.json_stopping = {"pvname": pvname, "queue_size": QUEUE_SIZE,
                          "available_message": [{"message_name": "on", "arg": 1},
                                                {"message_name": "end_{pvname}_service".format(pvname=pvname),
                                                 "arg": 1}]}
 
-        self.json_running = {"pvname": pvname, "queue_size": 5000,
+        self.json_running = {"pvname": pvname, "queue_size": QUEUE_SIZE,
                         "available_message": [{"message_name": "off", "arg": 1},
                                               {"message_name": "end_{pvname}_service".format(pvname=pvname),
                                                "arg": 1}]}
-        self.data_pv_json = {"pvname": "{pvname}_streamer".format(pvname = pvname), "queue_size": 5000, "type": data_type}
+        self.data_pv_json = {"pvname": "{pvname}_streamer".format(pvname = pvname), "queue_size": QUEUE_SIZE, "type": data_type}
 
 
     def retrieve_value(self):
