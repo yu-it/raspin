@@ -15,6 +15,9 @@ var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
 var res_TIMEOUT = JSON.stringify({"ret":"to"})
 var Timeout_limit = 60000
+var Default_layout_param_controller = "default"
+
+var Default_layout_param_data = "default"
 
 
 var client = require('redis').createClient();
@@ -125,14 +128,14 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
             var acount  = []
             json_data.available_message.forEach(function(mess_rec){
                     amess.push(mess_rec.message_name)
-                    acount.push(mess_rec.arg_count)
+                    acount.push(mess_rec.arg)
             })
-            var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg_count: acount})
+            var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg: acount, layout_param: json_data["layout_param"]})
             response_dict["chtml"].push(html_contents)
             response_dict["cpvid"].push(u_pvid)
 
         } else {
-            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type})
+            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type, layout_param: json_data["layout_param"]})
             response_dict["dhtml"].push(html_contents)
             response_dict["dpvid"].push(u_pvid)
 
@@ -177,6 +180,10 @@ function RegistControllerProviderMain(res,DataDesc) {
         console.log("id:" + pvid)
         DataDesc["pvid"] = pvid
         DataDesc["ptype"] = "c"
+        if (!("layout_param" in DataDesc)) {
+            DataDesc["layout_param"] = Default_layout_param_controller
+
+        }
 
         //Controller_providerのデータを登録する
         tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
@@ -201,9 +208,14 @@ function ModControllerProviderMain (res, pvid, DataDesc) {
     console.log("id:" + pvid)
     DataDesc["pvid"] = pvid
     DataDesc["ptype"] = "c"
+    if (!("layout_param" in DataDesc)) {
+        DataDesc["layout_param"] = Default_layout_param_controller
+
+    }
     //Controller_providerのデータを登録する
     tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
     tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
+
 
     //キューは随時作られるからとくに何もする必要ナシ
     tran.exec(function(){
@@ -225,6 +237,11 @@ function RegistDataProviderMain (res, DataDesc) {
         var tran = client.multi()
         DataDesc["pvid"] = pvid
         DataDesc["ptype"] = "d"
+        if (!("layout_param" in DataDesc)) {
+            DataDesc["layout_param"] = Default_layout_param_data
+
+        }
+
         console.log("id:" + pvid)
         tran.hset(k_name(Key_Data_Provider),  pvid, JSON.stringify(DataDesc))
         tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
@@ -380,16 +397,12 @@ function _check_RegistControllerProvider(DataDesc) {
     for (var mess_idx = 0; mess_idx < DataDesc["available_message"].length; mess_idx ++) {
         var entry = DataDesc["available_message"][mess_idx]
         var check_message_name = _required_variable_check(entry, "message_name")
-        var check_arg_count = _required_variable_check(entry, "arg_count")
-        var check_arg_count_is_num = _is_number_check(entry, "arg_count")
+        var check_arg = _required_variable_check(entry, "arg")
         if (check_message_name) {
             return check_message_name
         }
-        if (check_arg_count) {
-            return check_arg_count
-        }
-        if (check_arg_count_is_num) {
-            return check_arg_count_is_num
+        if (check_arg) {
+            return check_arg
         }
     }
 }
@@ -422,6 +435,9 @@ function _required_variable_check(target, variable) {
     init_vars()
     if (!(variable in target)) {
         return _create_error(variable + "is not contained")
+    } else if(target[variable] == undefined) {
+        return _create_error(variable + "is not contained")
+
     } else {
         return null
     }

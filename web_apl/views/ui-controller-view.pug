@@ -5,7 +5,7 @@ html
     include ../public/stylesheets/ui-controller.css
   script(src="javascripts/ui-controller.client.js")
   - var controller_id =  "area_" + pvid
-  div.pv_base&attributes({'id':controller_id, 'pvid':pvid})
+  div.pv_base&attributes({'id':controller_id, 'pvid':pvid, 'layout_param':layout_param})
    p #{pvid}
    each val, index in available_message
      - var val_class = val.substring(0,4)
@@ -22,5 +22,5 @@ html
            button.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u')") 
            button.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d')") 
        default
-         button.com&attributes({'pvid':pvid, 'message_name':available_message[index]})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
+         button.com&attributes({'pvid':pvid, 'message_name':available_message[index]})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]} #{layout_param}
   br

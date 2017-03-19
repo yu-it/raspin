@@ -27,14 +27,14 @@ class logging_service_skelton:
         self.pvname = pvname
         self.data_type = data_type
         self.json_stopping = {"pvname": pvname, "queue_size": 5000,
-                         "available_message": [{"message_name": "on", "arg_count": 1},
+                         "available_message": [{"message_name": "on", "arg": 1},
                                                {"message_name": "end_{pvname}_service".format(pvname=pvname),
-                                                "arg_count": 1}]}
+                                                "arg": 1}]}
 
         self.json_running = {"pvname": pvname, "queue_size": 5000,
-                        "available_message": [{"message_name": "off", "arg_count": 1},
+                        "available_message": [{"message_name": "off", "arg": 1},
                                               {"message_name": "end_{pvname}_service".format(pvname=pvname),
-                                               "arg_count": 1}]}
+                                               "arg": 1}]}
         self.data_pv_json = {"pvname": "{pvname}_streamer".format(pvname = pvname), "queue_size": 5000, "type": data_type}
 
 

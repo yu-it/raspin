@@ -52,7 +52,7 @@ class api:
         query = "RegisterControllerProvider?pvname={pv_name}&queue_size={queue_size}&".format(pv_name=urllib2.quote(pv_name),queue_size=queue_size)
         msgs = []
         for message in available_messages:
-            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
+            msgs.append("message_name={message}&arg={arg}".format(message=urllib2.quote(message["message_name"]), arg=message["arg"]))
         query += "&".join(msgs)
         return self.__call_api_get(query)
 
@@ -64,7 +64,7 @@ class api:
         query = "ModControllerProvider?pvid={pvid}&pvname={pv_name}&queue_size={queue_size}&".format(pvid=pvid,pv_name=urllib2.quote(pv_name),queue_size=queue_size)
         msgs = []
         for message in available_messages:
-            msgs.append("message_name={message}&arg_count={arg_count}".format(message=urllib2.quote(message["message_name"]), arg_count=message["arg_count"]))
+            msgs.append("message_name={message}&arg={arg}".format(message=urllib2.quote(message["message_name"]), arg=message["arg"]))
         query += "&".join(msgs)
         return self.__call_api_get(query)
 

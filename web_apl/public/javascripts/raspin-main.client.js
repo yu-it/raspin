@@ -38,7 +38,7 @@ function create_ui() {
 
 }
 function create_each_controller_ui(entry) {
-    var urlstring = "ui-controller?pvid=" + entry.pvid + "&pvname=" + entry.pvname
+    var urlstring = "ui-controller?pvid=" + entry.pvid + "&pvname=" + entry.pvname + "&layout_param=" + entry.layout_param
     if (Array.isArray(entry.available_message)) {
       entry.available_message.forEach(
         function (mess) {
@@ -70,7 +70,7 @@ function create_each_controller_ui(entry) {
 }
 function create_each_data_ui(entry) {
    $(".field_data").html("building controllers...")
-    var urlstring = "ui-data?pvid=" + entry.pvid + "&pvname=" + entry.pvname + "&type=" + entry.type
+    var urlstring = "ui-data?pvid=" + entry.pvid + "&pvname=" + entry.pvname + "&type=" + entry.type + "&layout_param=" + entry.layout_param
     $.ajax(
     {
       url:urlstring,

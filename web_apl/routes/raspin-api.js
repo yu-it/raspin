@@ -40,23 +40,29 @@ router.get('/Acknowledge', function(req, res, next) {
       
       logics.Acknowledge(res,pvid,req_id,jsontag)
 });
-//http://localhost:3000/raspin-api/RegisterControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg_count=1&arg_count=2
+//http://localhost:3000/raspin-api/RegisterControllerProvider?pvname=test_name&queue_size=200&message_name=on&message_name=end&arg=1&arg=2
 router.get('/RegisterControllerProvider', function(req, res, next) {
   var pvname = req.query.pvname
   var queue_size = req.query.queue_size
   var message_names = req.query.message_name
-  var arg_counts = req.query.arg_count
+  var args = req.query.arg
 
   if (!Array.isArray(message_names)) {
      message_names = [ message_names]
-     arg_counts = [ arg_counts]
+     args = [ args]
   }
   var available_messages = []
   for (var i = 0; i < message_names.length; i++) {
-    var mess_rec = {"message_name": message_names[i], "arg_count":arg_counts[i]}
+    var mess_rec = {"message_name": message_names[i], "arg":args[i]}
     available_messages.push(mess_rec)
   }
-  logics.RegistControllerProvider(res, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages})
+  if ("layout_param" in req.query) {
+      logics.RegistControllerProvider(res, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages, "layout_param": req.query.layout_param})
+
+  } else {
+      logics.RegistControllerProvider(res, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages})
+
+  } 
 });
 //http://localhost:3000/raspin-api/ModControllerProvider?pvid=2&pvname=test_name_mod&queue_size=150&message_name=on_mod&message_name=end&arg_count=1&arg_count=3
 router.get('/ModControllerProvider', function(req, res, next) {
@@ -64,14 +70,19 @@ router.get('/ModControllerProvider', function(req, res, next) {
   var pvname = req.query.pvname
   var queue_size = req.query.queue_size
   var message_names = req.query.message_name
-  var arg_counts = req.query.arg_count
+  var args = req.query.arg
 
   var available_messages = []
   for (var i = 0; i < message_names.length; i++) {
-    var mess_rec = {"message_name": message_names[i], "arg_count":arg_counts[i]}
+    var mess_rec = {"message_name": message_names[i], "arg":args[i]}
     available_messages.push(mess_rec)
   }
-  logics.ModControllerProvider(res, pvid, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages})
+  if ("layout_param" in req.query) {
+      logics.ModControllerProvider(res, pvid, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages, "layout_param": req.query.layout_param})
+  } else {
+      logics.ModControllerProvider(res, pvid, {"pvname": pvname, "queue_size": queue_size,"available_message": available_messages})
+
+  }
 });
 //http://localhost:3000/raspin-api/RegisterDataProvider?pvname=test_data_provider&queue_size=2000&type=num
 router.get('/RegisterDataProvider', function(req, res, next) {
@@ -79,7 +90,12 @@ router.get('/RegisterDataProvider', function(req, res, next) {
   var queue_size = req.query.queue_size
   var type = req.query.type
 
-  logics.RegistDataProvider(res, {"pvname": pvname, "queue_size": queue_size,"type": type})
+  if ("layout_param" in req.query) {
+      logics.RegistDataProvider(res, {"pvname": pvname, "queue_size": queue_size,"type": type, "layout_param": req.query.layout_param})
+  } else {
+      logics.RegistDataProvider(res, {"pvname": pvname, "queue_size": queue_size,"type": type})
+
+  }
 });
 //http://localhost:3000/raspin-api/DeleteProvider?pvid=2
 router.get('/DeleteProvider', function(req, res, next) {
