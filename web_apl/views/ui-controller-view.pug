@@ -15,7 +15,6 @@ html
       when "dir_"
       default
        button.com&attributes({'pvid':pvid, 'message_name':available_message[index]})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
-   br
    each val, index in available_message
      - var val_class = val.substring(0,4)
      div
@@ -24,7 +23,6 @@ html
          - var inp_id = "inp_" + pvid
          input(type="text", id=inp_id)
          button.inp&attributes({'pvid':pvid, 'message_name':available_message[index], 'inp_id':inp_id})(value="inp_" + index + "-" + val, onclick="button_inp_click(this.getAttribute('pvid'), this.getAttribute('inp_id'), this.getAttribute('message_name'))")  設定
-         br
    each val, index in available_message
      - var val_class = val.substring(0,4)
      div
@@ -36,5 +34,4 @@ html
            br
            button.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u')") 
            button.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d')") 
-           br
   br
