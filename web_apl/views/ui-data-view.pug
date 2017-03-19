@@ -5,13 +5,13 @@ html
     include ../public/stylesheets/ui-data.css
   script(src="javascripts/ui-data.client.js")
   - var layout_class = layout_param.split("@")[0].split("-")[0]
-  - var css_class = "pv_base pv_d d_type_" + type + " " + layout_class
+  - var css_class = "pv_base d_type_" + type + " " + layout_class
   - if (type == "num") {
-  -   css_class += " num"
+  -   css_class += " pv_d num"
   -} else if (type == "message") {
   -   css_class += " message"  
   -} else if (type == "video") {
-  -   css_class += " video"  
+  -   css_class += " pv_d video"  
   -}
   div&attributes({'id':pvid, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param, 'class': css_class, 'unit':unit})
    p&attributes({"class":"caption "  + layout_class}) #{pvname}
