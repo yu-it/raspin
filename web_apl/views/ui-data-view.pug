@@ -23,6 +23,6 @@ html
         span.unit #{unit} 
        
      when "video"
-       img(src="http://192.168.2.123:8080/?action=stream")
+       img&attributes({"class":"video contents "  + layout_class})(src="http://192.168.2.123:8080/?action=stream")
      when "message"
        div&attributes({"class":"message contents "  + layout_class})

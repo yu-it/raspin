@@ -18,7 +18,7 @@
 
 div.pv_d{
     margin :2% 2% 2% 2%;
-    padding:2% 2% 2% 2%;
+    padding: 5px;
     background-color: #FFFFFF;
 
 }
@@ -27,4 +27,7 @@ div.default.message.contents{
     display: block;
     height:10vh;
     overflow: scroll;
+}
+.video.contents{
+    margin :1%;
 }
