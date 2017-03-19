@@ -6,7 +6,7 @@ html
   script(src="javascripts/ui-controller.client.js")
   - var layout_class = layout_param.split("@")[0].split("-")[0]
   div.pv_base.pv_c&attributes({'id':pvid, 'pvid':pvid, 'layout_param':layout_param})
-   span #{pvname}:
+   span.default.controller_title #{pvname}:
    - if (!Array.isArray(available_message)) available_message = [available_message];
    each val, index in available_message
      - var val_class = val.substring(0,4)

@@ -30,7 +30,8 @@ button.inp{
  background-color: #00FF00;
 }
 button.com{
- background-color: #0000FF;
+ background-color: #DDDDDD;
+ font-size:24pt;
 }
 
 div.direction{
@@ -42,4 +43,7 @@ div.pv_base{
   padding: 5px;
   background-color: #FFFFFF;
 }
-
+.default.controller_title {
+ font-size:24pt;
+  
+}
