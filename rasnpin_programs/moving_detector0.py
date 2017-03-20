@@ -28,4 +28,4 @@ def observe():
     #with open(r"c:\myspace\a.jpg", "wb") as w:
     #    w.write(data)
 
-
+observe()
