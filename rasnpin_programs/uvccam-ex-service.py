@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import raspin.raspin as api
 from time import time
 from multiprocessing import Process
