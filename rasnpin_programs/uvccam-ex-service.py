@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import raspin.api as api
+import raspin.raspin
 from time import time
 from multiprocessing import Process
 import subprocess
@@ -11,7 +11,7 @@ from PIL import Image
 import raspin.my_mailer
 from StringIO import StringIO
 
-
+api = raspin.raspin.api("localhost",3000)
 p = None
 detect_p = None
 
