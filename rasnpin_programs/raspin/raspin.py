@@ -2,7 +2,6 @@
 
 import urllib2
 import json
-import pymongo
 
 class api:
 
