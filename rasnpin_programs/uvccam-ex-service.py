@@ -115,6 +115,7 @@ if __name__ == "__main__":
 
             detect_p = Process(target=observe())
             detect_p.start()
+            log ("started")
             current_availables[1] = available_mess_detect_off
 
             api.mod_controller_provider(pvid,
@@ -123,7 +124,9 @@ if __name__ == "__main__":
                                              current_availables,
                                              layout_param_con
                                              )
+            log ("modded")
             api.acknowledge(pvid, mess['req_id'], "1", [pvid], [])
+            log("ack")
 
         elif mess["message"] == available_mess_detect_off["message_name"]:
             detect_p.terminate()
