@@ -63,4 +63,4 @@ def send_mail_with_picture (to_ad, title, body, attach_path):
     msg = create_message(ADDRESS, to_ad, title, body, mime, attach_file)
 
     # 送信
-    send(from_ad, [to_ad], msg)
+    send(ADDRESS, [to_ad], msg)

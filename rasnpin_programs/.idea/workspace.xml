@@ -33,7 +33,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="moving_detector0.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="moving_detector0.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/moving_detector0.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="216">
@@ -45,11 +45,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="my_mailer.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="my_mailer.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/raspin/my_mailer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+            <state relative-caret-position="392">
+              <caret line="65" column="17" selection-start-line="65" selection-start-column="17" selection-end-line="65" selection-end-column="17" />
               <folding>
                 <element signature="e#25#39#0" expanded="true" />
               </folding>
@@ -151,8 +151,8 @@
         <option value="$PROJECT_DIR$/raspin/logging_service_skelton.py" />
         <option value="$PROJECT_DIR$/raspin/moving_detector0.py" />
         <option value="$PROJECT_DIR$/raspin/raspin.py" />
-        <option value="$PROJECT_DIR$/raspin/my_mailer.py" />
         <option value="$PROJECT_DIR$/moving_detector0.py" />
+        <option value="$PROJECT_DIR$/raspin/my_mailer.py" />
       </list>
     </option>
   </component>
@@ -717,22 +717,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/raspin/my_mailer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding>
-            <element signature="e#25#39#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/moving_detector0.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="18" column="61" selection-start-line="18" selection-start-column="61" selection-end-line="18" selection-end-column="61" />
           <folding>
             <element signature="e#25#36#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/raspin/my_mailer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="65" column="17" selection-start-line="65" selection-start-column="17" selection-end-line="65" selection-end-column="17" />
+          <folding>
+            <element signature="e#25#39#0" expanded="true" />
           </folding>
         </state>
       </provider>
