@@ -12,6 +12,7 @@ from StringIO import StringIO
 
 p = None
 detect_p = None
+console_pvid = None
 
 available_mess_cam_on = {"message_name": "on", "arg": 1}
 available_mess_cam_off = {"message_name": "off", "arg": 1}
@@ -19,6 +20,7 @@ available_mess_detect_on = {"message_name": "detect_move", "arg": 1}
 available_mess_detect_off = {"message_name": "no_detecting", "arg": 1}
 current_availables = [available_mess_cam_on, available_mess_detect_on]
 layout_param_con = "default-controller@command console"
+layout_param_data = "default-data@basic data"
 
 
 def log(str):
@@ -48,8 +50,10 @@ def http_get(url):
     res = requests.get(url)
     return res.content
 
-def observe():
+def observe(data_pvid):
     print("1")
+
+    api = raspin.raspin.api("localhost", 3000)
     img1 = Image.open(StringIO(http_get("http://localhost:8080/?action=snapshot")))
     while True:
         data1 = numpy.array(img1)
@@ -61,6 +65,7 @@ def observe():
         if sum > 1500000:
             print("stranger")
             img2.save("./stranger.jpeg")
+            api.add_observation_data(data_pvid, "不審者見つけました。")
             raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "detect stranger", "怪しい人物を見かけました。", "./stranger.jpeg")
         else:
             img1 = img2
@@ -85,7 +90,7 @@ if __name__ == "__main__":
         if mess["message"] == available_mess_cam_on["message_name"]:
             data_pv_id = api.register_data_provider("uvc_cam", 5000,
                                                          "video", "-",
-                                                    "default-data@basic data")["pvid"]
+                                                    layout_param_data)["pvid"]
             launch_process(data_pv_id)
             current_availables[0] = available_mess_cam_off
             api.mod_controller_provider(pvid,
@@ -111,8 +116,8 @@ if __name__ == "__main__":
         elif mess["message"] == available_mess_detect_on["message_name"]:
             if current_availables[0]["message_name"] == "on":   #it is when cam is stopping
                 continue
-
-            detect_p = Process(target=observe)
+            console_pvid = api.register_data_provider("detecting_status",100, "message", 100,layout_param_data)
+            detect_p = Process(target=observe, args=[console_pvid])
             detect_p.start()
             log ("started")
             current_availables[1] = available_mess_detect_off
@@ -124,13 +129,13 @@ if __name__ == "__main__":
                                              layout_param_con
                                              )
             log ("modded")
-            api.acknowledge(pvid, mess['req_id'], "1", [pvid], [])
+            api.acknowledge(pvid, mess['req_id'], "1", [pvid,console_pvid], [])
             log("ack")
 
         elif mess["message"] == available_mess_detect_off["message_name"]:
             detect_p.terminate()
             detect_p = None
-
+            api.delete_provider(console_pvid)
             current_availables[1] = available_mess_detect_on
             api.mod_controller_provider(pvid,
                                         "uvc_cam",
@@ -138,7 +143,7 @@ if __name__ == "__main__":
                                         current_availables,
                                         layout_param_con
                                         )
-            api.acknowledge(pvid, mess['req_id'], "1", [pvid], [])
+            api.acknowledge(pvid, mess['req_id'], "1", [pvid], [console_pvid])
 
     if data_pv_id <> "":
         stop_process()
