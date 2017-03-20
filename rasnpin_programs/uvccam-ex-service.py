@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 import raspin.raspin
 from multiprocessing import Process
 import subprocess
@@ -55,7 +56,11 @@ def observe(data_pvid):
 
     api = raspin.raspin.api("localhost", 3000)
     img1 = Image.open(StringIO(http_get("http://localhost:8080/?action=snapshot")))
+    counter = 0
+    mail_count = 0
     while True:
+        if mail_count > 50:
+            return
         data1 = numpy.array(img1)
         time.sleep(1)
         img2 = Image.open(StringIO(http_get("http://localhost:8080/?action=snapshot")))
@@ -63,11 +68,19 @@ def observe(data_pvid):
         sum = numpy.sum(numpy.sqrt((data1 - data2) ** 2))
         print(sum)
         if sum > 1500000:
-            print("stranger")
-            img2.save("./stranger.jpeg")
-            api.add_observation_data(data_pvid, "不審者見つけました。")
-            raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "detect stranger", "怪しい人物を見かけました。", "./stranger.jpeg")
+            counter += 1
+            if counter < 3:
+                print("stranger")
+                mail_count += 1
+                img2.save("./stranger.jpeg")
+                api.add_observation_data(data_pvid, datetime.now().strftime("%Y/%m/%d %H:%M:%S") + "不審者見つけました。")
+                raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "detect stranger", "怪しい人物を見かけました。", "./stranger.jpeg")
+            elif counter > 10:
+                counter = 0
+                img1 = img2
+
         else:
+            counter = 0
             img1 = img2
     #with open(r"c:\myspace\a.jpg", "wb") as w:
     #    w.write(data)
