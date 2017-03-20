@@ -117,6 +117,6 @@ class logging_service_skelton:
         if data_pv_id <> "":
             self.__stop_process()
             self.api.delete_provider(data_pv_id)
-            self.api.delete_provider(self.pvid)
+        self.api.delete_provider(self.pvid)
 
 

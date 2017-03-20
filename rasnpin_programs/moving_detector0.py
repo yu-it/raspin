@@ -24,7 +24,8 @@ def observe():
             print("stranger")
             img2.save("./stranger.jpeg")
             raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "detect stranger", "怪しい人物を見かけました。", "./stranger.jpeg")
-        img1 = img2
+        else:
+            img1 = img2
     #with open(r"c:\myspace\a.jpg", "wb") as w:
     #    w.write(data)
 
