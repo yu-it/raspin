@@ -70,11 +70,11 @@ def observe(data_pvid):
         if sum > 1500000:
             counter += 1
             if counter < 3:
-                print("stranger")
+                print("suspicious person")
                 mail_count += 1
                 img2.save("./stranger.jpeg")
-                api.add_observation_data(data_pvid, datetime.now().strftime("%Y/%m/%d %H:%M:%S") + "不審者見つけました。")
-                raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "detect stranger", "怪しい人物を見かけました。", "./stranger.jpeg")
+                api.add_observation_data(data_pvid, datetime.now().strftime("%Y/%m/%d %H:%M:%S") + "人物を検出しました。")
+                raspin.my_mailer.send_mail_with_picture("fwje7971@hotmail.com", "suspicious person", "人物を検出しました。", "./stranger.jpeg")
             elif counter > 10:
                 counter = 0
                 img1 = img2
