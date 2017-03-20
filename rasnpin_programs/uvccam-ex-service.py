@@ -4,7 +4,6 @@ from time import time
 from multiprocessing import Process
 import subprocess
 import raspin.my_mailer as mailer
-import time
 import numpy
 import requests
 from PIL import Image
@@ -113,7 +112,7 @@ if __name__ == "__main__":
             if current_availables[0]["message_name"] == "on":   #it is when cam is stopping
                 continue
 
-            detect_p = Process(target=observe())
+            detect_p = Process(target=observe)
             detect_p.start()
             log ("started")
             current_availables[1] = available_mess_detect_off

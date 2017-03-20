@@ -124,8 +124,8 @@
       <file leaf-file-name="uvccam-ex-service.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/uvccam-ex-service.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="502">
-              <caret line="98" column="0" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
+            <state relative-caret-position="185">
+              <caret line="113" column="0" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
               <folding>
                 <element signature="e#24#44#0" expanded="true" />
               </folding>
@@ -750,8 +750,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/uvccam-ex-service.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="502">
-          <caret line="98" column="0" selection-start-line="98" selection-start-column="0" selection-end-line="98" selection-end-column="0" />
+        <state relative-caret-position="185">
+          <caret line="113" column="0" selection-start-line="113" selection-start-column="0" selection-end-line="113" selection-end-column="0" />
           <folding>
             <element signature="e#24#44#0" expanded="true" />
           </folding>
