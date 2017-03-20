@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import raspin.raspin
-from time import time
 from multiprocessing import Process
 import subprocess
 import raspin.my_mailer as mailer
+import time
 import numpy
 import requests
 from PIL import Image
