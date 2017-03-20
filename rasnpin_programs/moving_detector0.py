@@ -12,11 +12,11 @@ def http_get(url):
 
 def observe():
     print("1")
-    img1 = Image.open(StringIO(http_get("http://192.168.2.123:8080/?action=snapshot")))
+    img1 = Image.open(StringIO(http_get("http://localhost:8080/?action=snapshot")))
     while True:
         data1 = numpy.array(img1)
         time.sleep(1)
-        img2 = Image.open(StringIO(http_get("http://192.168.2.123:8080/?action=snapshot")))
+        img2 = Image.open(StringIO(http_get("http://localhost:8080/?action=snapshot")))
         data2 = numpy.array(img2)
         sum = numpy.sum(numpy.sqrt((data1 - data2) ** 2))
         print(sum)
