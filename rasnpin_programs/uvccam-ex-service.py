@@ -11,7 +11,6 @@ from PIL import Image
 import raspin.my_mailer
 from StringIO import StringIO
 
-api = raspin.raspin.api("localhost",3000)
 p = None
 detect_p = None
 
@@ -22,11 +21,6 @@ available_mess_detect_off = {"message_name": "no_detecting", "arg": 1}
 current_availables = [available_mess_cam_on, available_mess_detect_on]
 layout_param_con = "default-controller@command console"
 
-pvid = api.register_controller_provider(
-    "uvc_cam",
-    5000,
-    current_availables,
-    layout_param_con)["pvid"]
 
 def log(str):
     print(str)
@@ -76,6 +70,12 @@ def observe():
 
 
 if __name__ == "__main__":
+    api = raspin.raspin.api("localhost", 3000)
+    pvid = api.register_controller_provider(
+        "uvc_cam",
+        5000,
+        current_availables,
+        layout_param_con)["pvid"]
     while True:
         mess = api.subscribe_control_message(pvid, 100)
         log("docs------")
