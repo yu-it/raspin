@@ -116,7 +116,7 @@ if __name__ == "__main__":
         elif mess["message"] == available_mess_detect_on["message_name"]:
             if current_availables[0]["message_name"] == "on":   #it is when cam is stopping
                 continue
-            console_pvid = api.register_data_provider("detecting_status",100, "message", 100,layout_param_data)
+            console_pvid = api.register_data_provider("detecting_status",100, "message", 100,layout_param_data)["pvid"]
             detect_p = Process(target=observe, args=[console_pvid])
             detect_p.start()
             log ("started")
