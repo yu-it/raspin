@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import raspin.raspin.api as api
+import raspin.api as api
 from time import time
 from multiprocessing import Process
 import subprocess
