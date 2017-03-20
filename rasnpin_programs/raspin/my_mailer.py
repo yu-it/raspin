@@ -8,7 +8,7 @@ from email.Utils import formatdate
 from email.MIMEBase import MIMEBase
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
-SMTP = "smt.gmail.com"
+SMTP = "smtp.gmail.com"
 PORT = 587
 ADDRESS = "yousuke0303.sender@gmail.com"
 PASSWORD = "3Fjeo5Fr-X"
