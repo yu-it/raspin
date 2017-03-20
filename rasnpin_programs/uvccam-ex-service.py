@@ -112,12 +112,31 @@ if __name__ == "__main__":
         elif mess["message"] == available_mess_detect_on["message_name"]:
             if current_availables[0]["message_name"] == "on":   #it is when cam is stopping
                 continue
+
             detect_p = Process(target=observe())
             detect_p.start()
+            current_availables[1] = available_mess_detect_off
+
+            api.mod_controller_provider(pvid,
+                                             "uvc_cam",
+                                             5000,
+                                             current_availables,
+                                             layout_param_con
+                                             )
+            api.acknowledge(pvid, mess['req_id'], "1", [pvid], [])
 
         elif mess["message"] == available_mess_detect_off["message_name"]:
             detect_p.terminate()
             detect_p = None
+
+            current_availables[1] = available_mess_detect_on
+            api.mod_controller_provider(pvid,
+                                        "uvc_cam",
+                                        5000,
+                                        current_availables,
+                                        layout_param_con
+                                        )
+            api.acknowledge(pvid, mess['req_id'], "1", [pvid], [])
 
     if data_pv_id <> "":
         stop_process()
