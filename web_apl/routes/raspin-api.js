@@ -72,6 +72,10 @@ router.get('/ModControllerProvider', function(req, res, next) {
   var message_names = req.query.message_name
   var args = req.query.arg
 
+  if (!Array.isArray(message_names)) {
+     message_names = [ message_names]
+     args = [ args]
+  }
   var available_messages = []
   for (var i = 0; i < message_names.length; i++) {
     var mess_rec = {"message_name": message_names[i], "arg":args[i]}
