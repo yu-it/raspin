@@ -10,6 +10,7 @@ var raspin_main = require('./routes/raspin-main');
 var raspin_api = require('./routes/raspin-api');
 var ui_controller = require('./routes/ui-controller');
 var ui_data = require('./routes/ui-data');
+var arbitary_test = require('./routes/arbitary_test');
 
 var app = express();
 
@@ -34,6 +35,7 @@ app.use('/', raspin_main);
 app.use('/raspin-api', raspin_api);
 app.use('/ui-controller', ui_controller);
 app.use('/ui-data', ui_data);
+app.use('/test', arbitary_test);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

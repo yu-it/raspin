@@ -42,23 +42,42 @@ function button_com_click(pvid, message_name) {
 function update_ui(res) {
 	if (res.restype == "modify") {
         for (var i = 0; i < res.ctags[0].length; i++) {
-        	if ($("#" + res.ctags[0][i]).length == 0) {
-        		$(".field_controller").append('<div id="' + res.ctags[0][i] + '"></div>')
+        	if ($("#container_" + res.ctags[0][i]).length == 0) {
+                var lay_param = res.ctags[2][i]
+                var lay_id = lay_param2lay_id(lay_param)
+                if ($("#" + lay_id).length == 0) {
+                    $("#main").append(container_tags(lay_param))
+                    
+                }
+                $("#" + lay_id + "_body").append('<div id=container_' + res.ctags[0][i] + '></div>')
         	}
-		    $("#" + res.ctags[0][i]).html(res.ctags[1][i])
+		    $("#container_" + res.ctags[0][i]).html(res.ctags[1][i])
 		
 	    }
         for (var i = 0; i < res.dtags[0].length; i++) {
-        	if ($("#" + res.dtags[0][i]).length == 0) {
-        		$(".field_data").append('<div id="' + res.dtags[0][i] + '"></div>')
+        	if ($("#container_" + res.dtags[0][i]).length == 0) {
+                var lay_param = res.dtags[2][i]
+                var lay_id =lay_param2lay_id(lay_param)
+                if ($("#" + lay_id).length == 0) {
+                    $("#main").append(container_tags(lay_param))
+                    
+                }
+                var obj = $(res.dtags[1][i])
+                if (obj.find(".message").length > 0) {
+                    $("#" + lay_id + "_footer").append('<div id=container_' + res.dtags[0][i] + '></div>')
+
+                } else {
+                    $("#" + lay_id + "_body").append('<div id=container_' + res.dtags[0][i] + '></div>')
+
+                }
         	}
-		    $("#" + res.dtags[0][i]).html(res.dtags[1][i])
+		    $("#container_" + res.dtags[0][i]).html(res.dtags[1][i])
 		    
 		
 	    }	
 	    for (var i = 0; i < res.del.length; i++) {
-            if ($("#" + res.del[i]).length) {
-                $("#" + res.del[i]).remove()
+            if ($("#container_" + res.del[i]).length) {
+                $("#container_" + res.del[i]).remove()
             }
         }
 	}
