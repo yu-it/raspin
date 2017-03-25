@@ -13,6 +13,11 @@ function log(str){
 
 var res_OK = JSON.stringify({"ret":"ok"})
 var res_NG = JSON.stringify({"ret":"ng"})
+var res_TIMEOUT = JSON.stringify({"ret":"to"})
+var Timeout_limit = 60000
+var Default_layout_param_controller = "default"
+
+var Default_layout_param_data = "default"
 
 
 var client = require('redis').createClient();
@@ -27,22 +32,27 @@ var response_queue = {}
 var response_accepted = {}
 client_for_subscribe_queue.on("pmessage",function(pattern, channel, mess) {
 	var pvid = channel.substring(channel.indexOf("_") + 1)
-	if (pvid in response_queue) {
-		//I want to detect timeout...
-		response_queue[pvid].send(mess)	
-		response_queue[pvid] = null
+	if (response_queue[pvid]) {
+        mess = JSON.parse(mess)
+        mess["ret"] = "ok"
+        response_queue[pvid].send(JSON.stringify(mess))
+		//response_queue[pvid] = null
+        delete response_queue[pvid] 
 		
-	}
+	} else {
+		var publisher = getPublisher()
+        publisher.publish(k_name(Key_Accepted, JSON.parse(mess)["req_id"]), JSON.stringify(res_NG))
+   }
 })
 
 
 client_for_subscribe_accepted.on("pmessage",function(pattern, channel, ret) {
 	var req_id = channel.substring(channel.indexOf("_") + 1)
 	var res = response_accepted[req_id]
-	if (req_id in response_accepted) {
-    	//I want to detect timeout...
+	if (response_accepted[req_id]) {
 		SendControllMessageAfterAcknowledged(res,req_id, ret)
-        response_accepted[req_id] = null
+        //response_accepted[req_id] = null
+        delete response_accepted[req_id] 
 	}
 })
 
@@ -66,6 +76,14 @@ function SendControllMessageMain(res, pvid, message, args) {
             getPublisher().publish(k_name(Key_Queue, pvid), JSON.stringify({"req_id":req_id, "message":message, "arg": args}))
             log("★★★message inserted★★★:" + pvid + "/" + req_id+ ":" + k_name(Key_Queue, pvid))
     	    response_accepted[req_id] = res
+            setTimeout(function(){
+                if (response_accepted[req_id]) {
+                    response_accepted[req_id].send(res_TIMEOUT)
+                    delete response_accepted[req_id]
+            
+                    log("send control timeout");
+                }
+            },Timeout_limit);
         })
     })
 }
@@ -74,12 +92,17 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 	log("★★★accepted★★★:" + req_id)
 	res.writeHead(200, { 'Content-Type': 'application/json' });
 	var ack_data = JSON.parse(ret)  //JSON文字列で通知が来ることを想定
+   if (ack_data == res_NG) {
+      res.end(res_NG)
+      return
+   }
+
 	if (ack_data.tag.ret =="1") {
 	    client.hmget(k_name(Key_All_Provider), ack_data.tag.u, function (err, datas) {
 		var contents = SendControllMessageCreateResponseData(ack_data.tag.u, datas)
 		var response_text = JSON.stringify({"restype":"modify",
-		    "ctags":[contents["cpvid"],contents["chtml"]],
-		    "dtags":[contents["dpvid"],contents["dhtml"]],
+		    "ctags":[contents["cpvid"],contents["chtml"],contents["clayout_param"]],
+		    "dtags":[contents["dpvid"],contents["dhtml"],contents["dlayout_param"]],
 		    "del":ack_data.tag.d})
             log(response_text)
 		res.end(response_text)
@@ -92,7 +115,7 @@ function SendControllMessageAfterAcknowledged(res, req_id, ret) {
 }
 
 function SendControllMessageCreateResponseData(pvids, jsons) {
-    var response_dict = {"cpvid":[], "chtml":[], "dpvid":[], "dhtml":[]}
+    var response_dict = {"cpvid":[], "chtml":[], "clayout_param":[], "dpvid":[], "dhtml":[], "dlayout_param":[]}
     for (var update_idx = 0; update_idx < pvids.length; update_idx ++) {
         var u_pvid =pvids[update_idx]
         var json_data = JSON.parse(jsons[update_idx])
@@ -105,16 +128,18 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
             var acount  = []
             json_data.available_message.forEach(function(mess_rec){
                     amess.push(mess_rec.message_name)
-                    acount.push(mess_rec.arg_count)
+                    acount.push(mess_rec.arg)
             })
-            var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg_count: acount})
+            var html_contents = pug.renderFile("./views/ui-controller-view.pug",{ pvid: u_pvid,pvname: json_data.pvname,available_message: amess,arg: acount, layout_param: json_data["layout_param"]})
             response_dict["chtml"].push(html_contents)
             response_dict["cpvid"].push(u_pvid)
+            response_dict["clayout_param"].push(json_data["layout_param"])
 
         } else {
-            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type})
+            var html_contents = pug.renderFile("./views/ui-data-view.pug",{ pvid:u_pvid,pvname: json_data.pvname,type: json_data.type, layout_param: json_data["layout_param"], unit:json_data["unit"]})
             response_dict["dhtml"].push(html_contents)
             response_dict["dpvid"].push(u_pvid)
+            response_dict["dlayout_param"].push(json_data["layout_param"])
 
         }
     }
@@ -124,7 +149,16 @@ function SendControllMessageCreateResponseData(pvids, jsons) {
 
 function SubscribeControlMessage(res,pvid) {
 	response_queue[pvid] = res
-
+   setTimeout(function(){
+       if (response_queue[pvid]) {
+           response_queue[pvid].send(res_TIMEOUT)
+           //response_queue[pvid] = null
+           delete response_queue[pvid]
+           
+           log("sbscribe timeout");
+       } 
+    },Timeout_limit);
+   
 }
 
 function AcknowledgeMain(res, pvid, req_id, tag) {
@@ -148,6 +182,10 @@ function RegistControllerProviderMain(res,DataDesc) {
         console.log("id:" + pvid)
         DataDesc["pvid"] = pvid
         DataDesc["ptype"] = "c"
+        if (!("layout_param" in DataDesc)) {
+            DataDesc["layout_param"] = Default_layout_param_controller
+
+        }
 
         //Controller_providerのデータを登録する
         tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
@@ -172,9 +210,14 @@ function ModControllerProviderMain (res, pvid, DataDesc) {
     console.log("id:" + pvid)
     DataDesc["pvid"] = pvid
     DataDesc["ptype"] = "c"
+    if (!("layout_param" in DataDesc)) {
+        DataDesc["layout_param"] = Default_layout_param_controller
+
+    }
     //Controller_providerのデータを登録する
     tran.hset(k_name(Key_Controller_Provider),  pvid, JSON.stringify(DataDesc))
     tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
+
 
     //キューは随時作られるからとくに何もする必要ナシ
     tran.exec(function(){
@@ -196,6 +239,15 @@ function RegistDataProviderMain (res, DataDesc) {
         var tran = client.multi()
         DataDesc["pvid"] = pvid
         DataDesc["ptype"] = "d"
+        if (!("layout_param" in DataDesc)) {
+            DataDesc["layout_param"] = Default_layout_param_data
+
+        }
+        if (!("unit" in DataDesc)) {
+            DataDesc["unit"] = "-"
+
+        }
+
         console.log("id:" + pvid)
         tran.hset(k_name(Key_Data_Provider),  pvid, JSON.stringify(DataDesc))
         tran.hset(k_name(Key_All_Provider),  pvid, JSON.stringify(DataDesc))
@@ -306,15 +358,17 @@ function GetObservationDataMain(res, pvid_ary, previous_gotten_data_id_ary) {
     
 }
 function AddOvservationDataMain(res, pvid, data) {
-    client.hexists("data_provider", pvid, function(err, is_exist) {
-        if (is_exist == 0) {
+    client.hget("data_provider", pvid, function(err, is_exist) {
+        if (is_exist == undefined) {
             res.send(res_NG)
             return
         }
+        is_exist = JSON.parse(is_exist)
 
         client.incr(k_name(Key_Data_Number))
         client.get(k_name(Key_Data_Number), function(err, val) {
             client.zadd(k_name(Key_Data, pvid), val, val + "-" + data)
+            var c = client.zremrangebyrank(k_name(Key_Data, pvid), 0, is_exist["queue_size"] * -1)
             res.send(res_OK)
         })
     })
@@ -351,16 +405,12 @@ function _check_RegistControllerProvider(DataDesc) {
     for (var mess_idx = 0; mess_idx < DataDesc["available_message"].length; mess_idx ++) {
         var entry = DataDesc["available_message"][mess_idx]
         var check_message_name = _required_variable_check(entry, "message_name")
-        var check_arg_count = _required_variable_check(entry, "arg_count")
-        var check_arg_count_is_num = _is_number_check(entry, "arg_count")
+        var check_arg = _required_variable_check(entry, "arg")
         if (check_message_name) {
             return check_message_name
         }
-        if (check_arg_count) {
-            return check_arg_count
-        }
-        if (check_arg_count_is_num) {
-            return check_arg_count_is_num
+        if (check_arg) {
+            return check_arg
         }
     }
 }
@@ -393,6 +443,9 @@ function _required_variable_check(target, variable) {
     init_vars()
     if (!(variable in target)) {
         return _create_error(variable + "is not contained")
+    } else if(target[variable] == undefined) {
+        return _create_error(variable + "is not contained")
+
     } else {
         return null
     }

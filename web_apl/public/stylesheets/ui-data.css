@@ -1,0 +1,44 @@
+.d_type_num{
+    color:#888888;
+    font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
+    font-size: 24pt;
+    padding:2%;
+   
+}
+.d_type_video{
+   
+}
+.d_type_message{
+   
+}
+
+div.pv_d{
+    margin :5px;
+    height:300px;
+    width:340px;
+    padding: 5px;
+    background-color: #FFFFFF;
+
+}
+div.pv_d.message {
+    width:auto !important;
+    height:15vh !important;
+}
+div.default.message.contents{
+    padding: 5px;
+    display: block;
+    width:auto !important;
+    height:10vh;
+    overflow: scroll;
+}
+.video.contents{
+    margin :1%;
+}
+.num.contents{
+    font-size: 84pt;
+
+}
+.default.unit {
+    font-size: 24pt;
+
+}

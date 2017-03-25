@@ -4,19 +4,25 @@ html
    style
     include ../public/stylesheets/ui-data.css
   script(src="javascripts/ui-data.client.js")
-  - var controller_id =  "area_" + pvid
-  div.pv_base&attributes({'id':controller_id, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type})
-   p #{pvid}
+  - var layout_class = layout_param.split("@")[0].split("-")[0]
+  - var css_class = "pv_base d_type_" + type + " " + layout_class
+  - if (type == "num") {
+  -   css_class += " pv_d num"
+  -} else if (type == "message") {
+  -   css_class += " pv_d message"  
+  -} else if (type == "video") {
+  -   css_class += " pv_d video"  
+  -}
+  div&attributes({'id':pvid, 'pvid':pvid, 'previous_processed_data_id':"", "data_type":type, 'layout_param':layout_param, 'class': css_class, 'unit':unit})
+   p&attributes({"class":"caption "  + layout_class}) #{pvname}
+   
    case type
      when "num"
-       - var num_id = "num_" + pvid
-       p&attributes({'id':num_id, }) -------
+       div&attributes({"style":"text-align:right;vertical-align:bottom;display:table-cell;width:320px;height:240px;"})
+        span&attributes({"class":"num contents "  + layout_class})
+        span&attributes({"class":"num unit "  + layout_class}) #{unit} 
+       
      when "video"
-       - var num_id = "video_" + pvid
-       img(src="http://192.168.2.123:8080/?action=stream")
+       img&attributes({"class":"video contents "  + layout_class})(src="http://192.168.2.123:8080/?action=stream")
      when "message"
-       - var num_id = "message_" + pvid
-       p&attributes({'id':num_id, }) -------
-     default
-       button.com&attributes({'pvid':pvid})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
-  br
+       div&attributes({"class":"message contents "  + layout_class})
