@@ -62,7 +62,7 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
 
 
 def read_analog(ch):
-    readadc(ch, SPICLK, SPIMOSI, SPIMISO, SPICS)
+    return readadc(ch, SPICLK, SPIMOSI, SPIMISO, SPICS)
 
 
 def create_pwm(port, freq):
