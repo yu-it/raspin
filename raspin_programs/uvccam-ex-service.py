@@ -11,6 +11,8 @@ import requests
 from PIL import Image
 import raspin.my_mailer
 from StringIO import StringIO
+import raspin.pysical_util as py
+
 
 p = None
 detect_p = None
@@ -162,13 +164,13 @@ if __name__ == "__main__":
                                         )
             api.acknowledge(pvid, mess['req_id'], "1", [pvid], [console_pvid])
         elif mess["message"] == available_mess_left["message_name"]:
-            p.pwm(30)
+            py.pwm(30)
             api.acknowledge(pvid, mess['req_id'], "0", [], [])
         elif mess["message"] == available_mess_front["message_name"]:
-            p.pwm(80)
+            py.pwm(80)
             api.acknowledge(pvid, mess['req_id'], "0", [], [])
         elif mess["message"] == available_mess_right["message_name"]:
-            p.pwm(130)
+            py.pwm(130)
             api.acknowledge(pvid, mess['req_id'], "0", [], [])
 
 if data_pv_id <> "":
