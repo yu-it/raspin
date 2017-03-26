@@ -2,8 +2,10 @@ import platform
 
 if platform.system() == "Windows":
     do_drive = False
+    print("run as emu")
 else:
     do_drive = True
+    print("run actually")
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
 
