@@ -16,6 +16,13 @@ def create_pwm(port, freq):
     return pwm_port(do_drive, port, freq)
 
 
+def clear():
+    if do_drive:
+        GPIO.cleanup()
+        GPIO.setmode(GPIO.BCM)
+    else:
+        log("cleanup")
+
 class pwm_port:
     def __init__(self, _env, _port, _freq):
         self.env = _env
