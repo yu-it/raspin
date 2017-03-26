@@ -27,7 +27,7 @@ while True:
         driver.stop()
     elif mess["message"] == available_mess_kill["message_name"]:
         driver.stop()
-        api.acknowledge(pvid, mess["req_id"], 0, [], [pvid])
+        api.acknowledge(pvid, mess["req_id"], "1", [], [pvid])
         break
     api.acknowledge(pvid, mess["req_id"],0,[],[])
 
