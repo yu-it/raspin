@@ -1,6 +1,6 @@
 import raspin.pysical_util as pi
 from multiprocessing import Process, Value
-
+import time
 p = None
 current_duty = 0
 direction = 0
@@ -11,6 +11,7 @@ def move(initial, direction):
         initial.value = min(initial.value,130)
         initial.value = max(initial.value,30)
         pi.pwm(int(initial.value))
+        time.sleep(0.2)
         print(initial.value)
 
 
