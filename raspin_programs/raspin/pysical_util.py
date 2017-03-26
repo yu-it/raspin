@@ -1,6 +1,15 @@
+# -*- coding: utf-8 -*-
 import platform
 def log(str):
     print(str)
+
+
+
+# ピンの名前を変数として定義
+SPICLK = 11
+SPIMOSI = 10
+SPIMISO = 9
+SPICS = 8
 
 if platform.system() == "Windows":
     do_drive = False
@@ -10,6 +19,50 @@ else:
     print("run actually")
     import RPi.GPIO as GPIO
     GPIO.setmode(GPIO.BCM)
+    # SPI通信用の入出力を定義
+    GPIO.setup(SPICLK, GPIO.OUT)
+    GPIO.setup(SPIMOSI, GPIO.OUT)
+    GPIO.setup(SPIMISO, GPIO.IN)
+    GPIO.setup(SPICS, GPIO.OUT)
+
+
+def readadc(adcnum, clockpin, mosipin, misopin, cspin):
+    if adcnum > 7 or adcnum < 0:
+        return -1
+    GPIO.output(cspin, GPIO.HIGH)
+    GPIO.output(clockpin, GPIO.LOW)
+    GPIO.output(cspin, GPIO.LOW)
+
+    commandout = adcnum
+    commandout |= 0x18  # スタートビット＋シングルエンドビット
+    commandout <<= 3  # LSBから8ビット目を送信するようにする
+    for i in range(5):
+        # LSBから数えて8ビット目から4ビット目までを送信
+        if commandout & 0x80:
+            GPIO.output(mosipin, GPIO.HIGH)
+        else:
+            GPIO.output(mosipin, GPIO.LOW)
+        commandout <<= 1
+        GPIO.output(clockpin, GPIO.HIGH)
+        GPIO.output(clockpin, GPIO.LOW)
+    adcout = 0
+    # 13ビット読む（ヌルビット＋12ビットデータ）
+    for i in range(13):
+        GPIO.output(clockpin, GPIO.HIGH)
+        GPIO.output(clockpin, GPIO.LOW)
+        adcout <<= 1
+        if i > 0 and GPIO.input(misopin) == GPIO.HIGH:
+            adcout |= 0x1
+    GPIO.output(cspin, GPIO.HIGH)
+    return adcout
+
+
+
+
+
+
+def read_analog(ch):
+    readadc(ch, SPICLK, SPIMOSI, SPIMISO, SPICS)
 
 
 def create_pwm(port, freq):
