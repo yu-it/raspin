@@ -11,7 +11,7 @@ def move(initial, direction):
         initial.value = min(initial.value,130)
         initial.value = max(initial.value,30)
         pi.pwm(int(initial.value))
-        time.sleep(0.2)
+        time.sleep(0.07)
         print(initial.value)
 
 
