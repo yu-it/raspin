@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import raspin.pysical_util as p
 from datetime import datetime
 import raspin.raspin
 from multiprocessing import Process
@@ -19,7 +20,10 @@ available_mess_cam_on = {"message_name": "on", "arg": 1}
 available_mess_cam_off = {"message_name": "off", "arg": 1}
 available_mess_detect_on = {"message_name": "detect_move", "arg": 1}
 available_mess_detect_off = {"message_name": "no_detecting", "arg": 1}
-current_availables = [available_mess_cam_on, available_mess_detect_on]
+available_mess_left = {"message_name": "left", "arg": 1}
+available_mess_right = {"message_name": "right", "arg": 1}
+available_mess_front = {"message_name": "front", "arg": 1}
+current_availables = [available_mess_cam_on, available_mess_detect_on, available_mess_left, available_mess_front, available_mess_right]
 layout_param_con = "default-controller@command console"
 layout_param_data = "default-data@basic data"
 
@@ -157,10 +161,16 @@ if __name__ == "__main__":
                                         layout_param_con
                                         )
             api.acknowledge(pvid, mess['req_id'], "1", [pvid], [console_pvid])
+        elif mess["message"] == available_mess_left["message_name"]:
+            p.pwm(30)
+        elif mess["message"] == available_mess_front["message_name"]:
+            p.pwm(80)
+        elif mess["message"] == available_mess_right["message_name"]:
+            p.pwm(130)
 
-    if data_pv_id <> "":
+if data_pv_id <> "":
         stop_process()
         detect_p.terminate()
         api.delete_provider(data_pv_id)
-    api.delete_provider(pvid)
+api.delete_provider(pvid)
 
