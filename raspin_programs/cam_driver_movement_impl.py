@@ -11,6 +11,7 @@ def move(initial, direction):
         initial.value = min(initial.value,130)
         initial.value = max(initial.value,30)
         pi.pwm(initial.value)
+        print(initial.value)
 
 
 def up():
@@ -20,12 +21,14 @@ def down():
 
 def right():
     global p, num
+    print("right")
     if p <> None:
         p.terminate()
     p = Process(target=move, args=[num, 0.01])
     p.start()
 def left():
     global p, num
+    print("left")
     if p <> None:
         p.terminate()
     p = Process(target=move, args=[num, -0.01])

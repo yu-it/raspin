@@ -107,6 +107,7 @@ class pwm_port:
 
 
 def pwm(rate):
+    print(rate)
     rate = min(rate, 95)
     rate = max(rate, 5)
     wiringpi.pwmWrite(18,rate)
