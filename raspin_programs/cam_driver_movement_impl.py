@@ -10,7 +10,7 @@ def move(initial, direction):
         initial.value += direction
         initial.value = min(initial.value,130)
         initial.value = max(initial.value,30)
-        pi.pwm(initial.value)
+        pi.pwm(int(initial.value))
         print(initial.value)
 
 
@@ -24,14 +24,14 @@ def right():
     print("right")
     if p <> None:
         p.terminate()
-    p = Process(target=move, args=[num, 0.01])
+    p = Process(target=move, args=[num, 1])
     p.start()
 def left():
     global p, num
     print("left")
     if p <> None:
         p.terminate()
-    p = Process(target=move, args=[num, -0.01])
+    p = Process(target=move, args=[num, -1])
     p.start()
 
 def stop():
