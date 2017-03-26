@@ -9,29 +9,36 @@ html
    span.default.controller_title #{pvname}:
    - if (!Array.isArray(available_message)) available_message = [available_message];
    each val, index in available_message
-     - var val_class = val.substring(0,4)
+     - //var val_class = val.substring(0,4)
+     - var val_class = arg[index].substring(0,4)
      case val_class
       when "inp_"
+       break
+       
       when "dir_"
+       break
+       
       default
-       button.com&attributes({'pvid':pvid, 'message_name':available_message[index]})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
+       button.control.com&attributes({'pvid':pvid, 'message_name':available_message[index]})(onclick="button_com_click(this.getAttribute('pvid'),  this.getAttribute('message_name'))")  #{available_message[index]}
    each val, index in available_message
-     - var val_class = val.substring(0,4)
+     - //var val_class = val.substring(0,4)
+     - var val_class = arg[index].substring(0,4)
      div
       case val_class
        when "inp_"
-         - var inp_id = "inp_" + pvid
-         input(type="text", id=inp_id)
-         button.inp&attributes({'pvid':pvid, 'message_name':available_message[index], 'inp_id':inp_id})(value="inp_" + index + "-" + val, onclick="button_inp_click(this.getAttribute('pvid'), this.getAttribute('inp_id'), this.getAttribute('message_name'))")  設定
+         - var inp_id = "inp_" + pvid + available_message[index]
+         input.control(type="text", id=inp_id)
+         button.control.inp&attributes({'pvid':pvid, 'message_name':available_message[index], 'inp_id':inp_id})(value="inp_" + index + "-" + val, onclick="button_inp_click(this.getAttribute('pvid'), this.getAttribute('inp_id'), this.getAttribute('message_name'))")  設定
    each val, index in available_message
-     - var val_class = val.substring(0,4)
+     - //var val_class = val.substring(0,4)
+     - var val_class = arg[index].substring(0,4)
      div
       case val_class
        when "dir_"
          div.direction
-           button.left.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'l')") 
-           button.right.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'r')") 
+           button.control.left.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'l')") 
+           button.control.right.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'r')") 
            br
-           button.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u')") 
-           button.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d')") 
+           button.control.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u')") 
+           button.control.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d')") 
   br
