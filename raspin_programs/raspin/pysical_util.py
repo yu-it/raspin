@@ -25,6 +25,12 @@ else:
     GPIO.setup(SPIMISO, GPIO.IN)
     GPIO.setup(SPICS, GPIO.OUT)
 
+    import wiringpi as wiringpi
+    wiringpi.wiringPiSetupGpio() # GPIO名で番号を指定する
+    wiringpi.pinMode(18, wiringpi.GPIO.PWM_OUTPUT) # PWM出力を指定
+    wiringpi.pwmSetMode(wiringpi.GPIO.PWM_MODE_MS) # 周波数を固定するための設定
+    wiringpi.pwmSetClock(375) # 50 Hz。ここには 18750/(周波数) の計算値に近い整数を入れる
+
 
 def readadc(adcnum, clockpin, mosipin, misopin, cspin):
     if adcnum > 7 or adcnum < 0:
@@ -64,6 +70,9 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
 def read_analog(ch):
     return readadc(ch, SPICLK, SPIMOSI, SPIMISO, SPICS)
 
+def read_analog_volt(ch, rate = 1):
+    return read_analog(ch) * (3.3/4096.0) * 3
+
 
 def create_pwm(port, freq):
     return pwm_port(do_drive, port, freq)
@@ -96,3 +105,8 @@ class pwm_port:
         else:
             log("set duty of {num}, as {duty}".format(num = self.port, duty = cycle))
 
+
+def pwm(rate):
+    rate = min(rate, 95)
+    rate = max(rate, 5)
+    wiringpi.pwmWrite(18,rate * 1024/100)
