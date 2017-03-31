@@ -18,7 +18,7 @@ class uvccam_service(skelton):
 
         cmd = ["./mjpg_streamer"
         , "-i"
-        , './input_uvc.so -f 10 -r 320x240 -d /dev/video0 -y'
+        , './input_raspicam.so -fps 10 -x 320 -y 240'
         , "-o"
         , './output_http.so -w ./www -p 8080']
         
