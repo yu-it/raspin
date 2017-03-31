@@ -47,7 +47,7 @@ def launch_process(data_pvid):
         , "-o"
         , './output_http.so -w ./www -p 8080']
 
-    p = subprocess.Popen(cmd, cwd="/home/pi/bin/programs/camera_inst/mjpg-streamer/mjpg-streamer")
+    p = subprocess.Popen(cmd, cwd="/home/pi/bin/programs/camera_inst/mjpg-streamer/mjpg-streamer-experimental")
     # proc.communicate()
     time.sleep(3)
     print("@kidou kanryou")
