@@ -96,9 +96,11 @@ def stop():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_MIDDLE))
 def up_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
     pass
 def down_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
     pass
 def stop_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
@@ -109,10 +111,10 @@ def stop_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_MIDDLE))
     pass
 def up_arm2():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
     pass
 def down_arm2():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
     pass
 def stop_arm2():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_MIDDLE))
