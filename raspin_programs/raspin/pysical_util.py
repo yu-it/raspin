@@ -85,7 +85,7 @@ def i2c_write(address,  data, offset = 0x00):
 
                 bus.write_i2c_block_data(address, offset, data)
             else:
-                log("to {addr}, data[0]:{d0}, data[1]:{d1}, ".format(addr = address, d0 = data[0], d1 = data[1]))
+                log("to {addr}, comm:{c0}, data[0]:{d0}, data[1]:{d1}, ".format(addr = address, c0 = data[0], d0 = data[1], d1 = data[2]))
         except:
             log("retry...")
             continue

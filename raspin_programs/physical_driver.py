@@ -10,7 +10,7 @@ available_mess_Arm2 = {"message_name": "Arm2", "arg": "dir_ud", "layout_param": 
 available_mess_kill = {"message_name": "Kill", "arg": "0", "layout_param": "default-controller@controller"}
 available_mess_stop_all = {"message_name": "Stop All", "arg": "0", "layout_param": "default-controller@controller"}
 
-pvid = api.register_controller_provider("Physical Control", 3000, [available_mess_mv, available_mess_Arm1, available_mess_Arm2, available_mess_kill, available_mess_stop_all])["pvid"]
+pvid = api.register_controller_provider("Physical Control", 3000, [available_mess_mv, available_mess_Speed ,available_mess_Arm1, available_mess_Arm2, available_mess_kill, available_mess_stop_all])["pvid"]
 while True:
     mess = api.subscribe_control_message(pvid,120)
     if mess["ret"] == "to":
