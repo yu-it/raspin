@@ -29,16 +29,39 @@ html
          - var inp_id = "inp_" + pvid + available_message[index]
          input.control(type="text", id=inp_id)
          button.control.inp&attributes({'pvid':pvid, 'message_name':available_message[index], 'inp_id':inp_id})(value="inp_" + index + "-" + val, onclick="button_inp_click(this.getAttribute('pvid'), this.getAttribute('inp_id'), this.getAttribute('message_name'))")  設定
-   each val, index in available_message
-     - //var val_class = val.substring(0,4)
-     - var val_class = arg[index].substring(0,4)
-     div
-      case val_class
-       when "dir_"
-         div.direction
-           button.control.left.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'l')") 
-           button.control.right.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'r')") 
-           br
-           button.control.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u')") 
-           button.control.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onclick="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d')") 
-  br
+   div.dir_container
+    each val, index in available_message
+      - //var val_class = val.substring(0,4)
+      - var val_class = arg[index].substring(0,4)
+      div
+       case val_class
+        when "dir_"
+          - var desc = arg[index].substring(4).toLowerCase()
+          - var offset = index * 70
+          - var offset_css = "left:" + offset + "px;"
+          - var span_style = offset_css + "position:relative;"
+          - var dir_name = available_message[index];
+          span.default.controller_title&attributes({'style':span_style}) #{dir_name}:
+          div.direction&attributes({'style':offset_css})
+            - var l_idx = desc.indexOf('l') >= 0 ? 1 : 0
+            - var r_idx = desc.indexOf('r') >= 0 ? 1 : 0
+            - var u_idx = desc.indexOf('u') >= 0 ? 1 : 0
+            - var d_idx = desc.indexOf('d') >= 0 ? 1 : 0
+            if l_idx
+             button.control.left.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onmousedown="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'l_p')", onmouseup="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'l_r')") 
+            else
+             img.control.left.direction(src="../images/allow_l_disable.png")
+            if r_idx
+             button.control.right.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onmousedown="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'r_p')", onmouseup="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'r_r')") 
+            else
+             img.control.right.direction(src="../images/allow_r_disable.png")
+            br
+            if u_idx
+             button.control.up.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onmousedown="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u_p')", onmouseup="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'u_r')") 
+            else
+             img.control.up.direction(src="../images/allow_u_disable.png")
+            if d_idx
+             button.control.down.direction&attributes({'pvid':pvid, 'message_name':available_message[index]})(value=pvid, onmousedown="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d_p')", onmouseup="button_direction_click(this.getAttribute('pvid'),  this.getAttribute('message_name'),'d_r')") 
+            else
+             img.control.down.direction(src="../images/allow_d_disable.png")
+br

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import platform
+
+
+
 def log(str):
     print(str)
-
-
 
 # ピンの名前を変数として定義
 SPICLK = 11
@@ -11,13 +12,24 @@ SPIMOSI = 10
 SPIMISO = 9
 SPICS = 8
 
+#i2cバスオブジェクト
+bus = None
+
+#i2cリトライ
+I2CRETRY = 5
+
+
 if platform.system() == "Windows":
     do_drive = False
     print("run as emu")
 else:
     do_drive = True
+
     print("run actually")
     import RPi.GPIO as GPIO
+    import smbus
+
+    bus = smbus.SMBus(1)
     GPIO.setmode(GPIO.BCM)
     # SPI通信用の入出力を定義
     GPIO.setup(SPICLK, GPIO.OUT)
@@ -64,6 +76,23 @@ def readadc(adcnum, clockpin, mosipin, misopin, cspin):
 
 
 
+def i2c_write(address,  data, offset = 0x00):
+
+    success = False
+    for x in xrange(I2CRETRY):
+        try:
+            if do_drive:
+
+                bus.write_i2c_block_data(address, offset, data)
+            else:
+                log("to {addr}, data[0]:{d0}, data[1]:{d1}, ".format(addr = address, d0 = data[0], d1 = data[1]))
+        except:
+            log("retry...")
+            continue
+        success = True
+        break
+    if not success:
+        raise Exception("I2C Error")
 
 
 
