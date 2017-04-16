@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import raspin.pysical_util as p
 from datetime import datetime
 import raspin.raspin
 from multiprocessing import Process
@@ -10,6 +11,8 @@ import requests
 from PIL import Image
 import raspin.my_mailer
 from StringIO import StringIO
+import raspin.pysical_util as py
+
 
 p = None
 detect_p = None
@@ -19,7 +22,10 @@ available_mess_cam_on = {"message_name": "on", "arg": 1}
 available_mess_cam_off = {"message_name": "off", "arg": 1}
 available_mess_detect_on = {"message_name": "detect_move", "arg": 1}
 available_mess_detect_off = {"message_name": "no_detecting", "arg": 1}
-current_availables = [available_mess_cam_on, available_mess_detect_on]
+available_mess_left = {"message_name": "left", "arg": 1}
+available_mess_right = {"message_name": "right", "arg": 1}
+available_mess_front = {"message_name": "front", "arg": 1}
+current_availables = [available_mess_cam_on, available_mess_detect_on, available_mess_left, available_mess_front, available_mess_right]
 layout_param_con = "default-controller@command console"
 layout_param_data = "default-data@basic data"
 
@@ -37,11 +43,11 @@ def launch_process(data_pvid):
     global p
     cmd = ["./mjpg_streamer"
         , "-i"
-        , './input_uvc.so -f 10 -r 320x240 -d /dev/video0 -y'
+        , './input_raspicam.so -fps 10 -x 320 -y 240'
         , "-o"
         , './output_http.so -w ./www -p 8080']
 
-    p = subprocess.Popen(cmd, cwd="/home/pi/bin/programs/camera_inst/mjpg-streamer/mjpg-streamer")
+    p = subprocess.Popen(cmd, cwd="/home/pi/bin/programs/camera_inst/mjpg-streamer/mjpg-streamer-experimental")
     # proc.communicate()
     time.sleep(3)
     print("@kidou kanryou")
@@ -157,10 +163,19 @@ if __name__ == "__main__":
                                         layout_param_con
                                         )
             api.acknowledge(pvid, mess['req_id'], "1", [pvid], [console_pvid])
+        elif mess["message"] == available_mess_left["message_name"]:
+            py.pwm(30)
+            api.acknowledge(pvid, mess['req_id'], "0", [], [])
+        elif mess["message"] == available_mess_front["message_name"]:
+            py.pwm(80)
+            api.acknowledge(pvid, mess['req_id'], "0", [], [])
+        elif mess["message"] == available_mess_right["message_name"]:
+            py.pwm(130)
+            api.acknowledge(pvid, mess['req_id'], "0", [], [])
 
-    if data_pv_id <> "":
+if data_pv_id <> "":
         stop_process()
         detect_p.terminate()
         api.delete_provider(data_pv_id)
-    api.delete_provider(pvid)
+api.delete_provider(pvid)
 
