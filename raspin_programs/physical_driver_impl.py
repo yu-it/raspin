@@ -47,7 +47,7 @@ def init_pysical_status():
     current_gear = CON_POWER_STEP / 2
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR_POW,as_array(CON_MORTOR_POWERS[current_gear])))
 
-    #アーム初期化
+    #init arm
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
     time.sleep(3)
