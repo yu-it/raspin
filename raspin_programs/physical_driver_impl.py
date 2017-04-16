@@ -45,7 +45,7 @@ def init_pysical_status():
 
     global current_gear
     #current_gear = CON_POWER_STEP / 2
-    current_gear = CON_POWER_STEP
+    current_gear = CON_POWER_STEP - 1
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR_POW,as_array(CON_MORTOR_POWERS[current_gear])))
 
     #init arm
