@@ -81,11 +81,11 @@ def i2c_write(address,  data, offset = 0x00):
     success = False
     for x in xrange(I2CRETRY):
         try:
+            log("to {addr}, comm:{c0}, data[0]:{d0}, data[1]:{d1}, ".format(addr=address, c0=data[0], d0=data[1],
+                                                                            d1=data[2]))
             if do_drive:
 
                 bus.write_i2c_block_data(address, offset, data)
-            else:
-                log("to {addr}, comm:{c0}, data[0]:{d0}, data[1]:{d1}, ".format(addr = address, c0 = data[0], d0 = data[1], d1 = data[2]))
         except:
             log("retry...")
             continue
