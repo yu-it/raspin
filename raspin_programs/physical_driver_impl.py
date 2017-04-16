@@ -1,3 +1,4 @@
+import time
 import raspin.pysical_util as pu
 ADDRESS_PIC = 0x12
 COM_SET_SERVO1_MIN = 0x01
@@ -28,7 +29,7 @@ CON_UP = [0x03,0x00]
 CON_MIDDLE = [0x02,0x00]
 CON_DOWN = [0x01,0x00]
 
-current_gear = 3
+current_gear = 5
 
 
 def as_array(val):
@@ -46,6 +47,10 @@ def init_pysical_status():
     current_gear = CON_POWER_STEP / 2
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR_POW,as_array(CON_MORTOR_POWERS[current_gear])))
 
+    #アーム初期化
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
+    time.sleep(3)
     pass
 
 
