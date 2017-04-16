@@ -25,6 +25,12 @@ CON_POWER_STEP = 5
 #CON_MORTOR_POWERS = [x * (CON_MORTOR_MAX_POWER / CON_POWER_STEP) for x in xrange(CON_POWER_STEP)]
 CON_MORTOR_POWERS = [as_array((x + 1) * (CON_MORTOR_MAX_POWER / CON_POWER_STEP)) for x in xrange(CON_POWER_STEP)]
 CON_MORTOR_POWERS = [[0xff,0x00],[0xff,0x01],[0x00,0x02],[0x00,0x03],[0xff,0x03]]
+
+CON_ES08MA2_MIN_ANGLE = [0x20, 0x01]
+CON_ES08MA2_MAX_ANGLE = [0xff, 0x03]
+CON_ES08MA2_POWER_MODERATE = [0x0d, 0x00]
+CON_ES08MA2_POWER_FAST = [0x03, 0x00]
+
 CON_SG92R_MIN_ANGLE = [0xf0, 0x00]
 CON_SG92R_MAX_ANGLE = [0xff, 0x03]
 CON_SG92R_POWER_MODERATE = [0x0d, 0x00]
@@ -39,11 +45,11 @@ current_gear = 5
 
 
 def init_pysical_status():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MAX, CON_SG92R_MAX_ANGLE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MAX, CON_ES08MA2_MAX_ANGLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MAX, CON_SG92R_MAX_ANGLE))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MIN, CON_SG92R_MIN_ANGLE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MIN, CON_ES08MA2_MIN_ANGLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MIN, CON_SG92R_MIN_ANGLE))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_POW, CON_SG92R_POWER_MODERATE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_POW, CON_ES08MA2_POWER_MODERATE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_POW, CON_SG92R_POWER_MODERATE))
 
     global current_gear
@@ -90,11 +96,11 @@ def stop():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_MIDDLE))
 def up_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
     pass
 def down_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
     pass
 def stop_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
@@ -105,10 +111,10 @@ def stop_arm1():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_MIDDLE))
     pass
 def up_arm2():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
     pass
 def down_arm2():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
     pass
 def stop_arm2():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
