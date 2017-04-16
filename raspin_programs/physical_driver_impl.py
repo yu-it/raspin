@@ -44,7 +44,8 @@ def init_pysical_status():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_POW, CON_SG92R_POWER_MODERATE))
 
     global current_gear
-    current_gear = CON_POWER_STEP / 2
+    #current_gear = CON_POWER_STEP / 2
+    current_gear = CON_POWER_STEP
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR_POW,as_array(CON_MORTOR_POWERS[current_gear])))
 
     #init arm
@@ -95,14 +96,14 @@ def stop_arm1():
     pass
 def up_arm2():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_UP))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
+    #pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_DOWN))
     pass
 def down_arm2():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_DOWN))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
+    #pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_UP))
     pass
 def stop_arm2():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
+    #pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_MIDDLE))
     pass
 
