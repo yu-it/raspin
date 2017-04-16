@@ -100,3 +100,5 @@ def stop_arm2():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO1, CON_MIDDLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_MOV_SERVO2, CON_MIDDLE))
     pass
+
+init_pysical_status()
