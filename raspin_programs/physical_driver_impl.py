@@ -78,11 +78,12 @@ def back():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR1_DIR, CON_DOWN))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_DOWN))
 def right_turn():
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR1_DIR, CON_UP))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_DOWN))
-def left_turn():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR1_DIR, CON_DOWN))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_UP))
+
+def left_turn():
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR1_DIR, CON_UP))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_MORTOR2_DIR, CON_DOWN))
 def speed_up():
     global current_gear
     current_gear = min(CON_POWER_STEP - 1, current_gear + 1)
