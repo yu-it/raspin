@@ -52,11 +52,11 @@ current_gear = 5
 
 def init_pysical_status():
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MAX, CON_DS939MG_MAX_ANGLE))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MAX, CON_SG92R_MAX_ANGLE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MAX, CON_DS939MG_MAX_ANGLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_MIN, CON_DS939MG_MIN_ANGLE))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MIN, CON_SG92R_MIN_ANGLE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_MIN, CON_DS939MG_MIN_ANGLE))
     pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO1_POW, CON_DS939MG_POWER_MODERATE))
-    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_POW, CON_SG92R_POWER_MODERATE))
+    pu.i2c_write(ADDRESS_PIC, com_and_data(COM_SET_SERVO2_POW, CON_DS939MG_POWER_MODERATE))
 
     global current_gear
     #current_gear = CON_POWER_STEP / 2
