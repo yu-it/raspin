@@ -8,10 +8,12 @@ div.header{
   
   }
 div.default.entire{
+    background-color :#DDDDDD;
     margin:2% 0% 2% 0%;
+    padding:2% 2% 2% 2%;
 }
 div.default.body{
-  background-color :#DDDDDD;
+  background-color :#ffffff;
   padding:1%;
   display: -webkit-box;
   display: -moz-box;

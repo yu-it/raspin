@@ -1,29 +1,55 @@
+function before_process() {
+    $(".control").prop("disabled", true);
+}
+
+function after_process() {
+    $(".control").prop("disabled", false);
+    
+}
+
+
 function button_direction_click(pvid, message_name, direction) {
+  //var urlstr = "raspin-api/SendToController?pvid=" + pvid + "&message=" + message_name + "&arg=" + direction
+  //alert(urlstr)
+  before_process()
   var urlstr = "raspin-api/SendToController?pvid=" + pvid + "&message=" + message_name + "&arg=" + direction
-  alert(urlstr)
-  /*
   $.ajax(
   {
    url:urlstr,
    success :
     function(msg) {
        var htm = ""
-       msg.forEach(
-         function (entry) {
-            alert(msg)
-         }
-       )
-    }
+       update_ui(msg)
+       after_process()
+    },
+   error : control_error_handler
   }
   )
-  */
  
 }
 function button_inp_click(pvid, inp_id, message_name) {
-    var src = pvid + "/" + ($("#" + inp_id).val())
-    alert (pvid + "-inp-" + src + "*" + message_name)
+  before_process()
+//  var src = pvid + "/" + ($("#" + inp_id).val())
+//  alert (pvid + "-inp-" + src + "*" + message_name)
+  var strings = encodeURI( $("#" + inp_id).val());
+  var urlstr = "raspin-api/SendToController?pvid=" + pvid + "&message=" + message_name + "&arg=" + strings
+  $.ajax(
+  {
+   url:urlstr,
+   success :
+    function(msg) {
+       var htm = ""
+       
+//        $("#console_div").html(new Date().getTime().toString() + "/" + msg)
+       update_ui(msg)
+       after_process()
+    },
+   error : control_error_handler
+  }
+  )
 }
 function button_com_click(pvid, message_name) {
+  before_process()
   var urlstr = "raspin-api/SendToController?pvid=" + pvid + "&message=" + message_name + "&arg=0"
   $.ajax(
   {
@@ -34,6 +60,7 @@ function button_com_click(pvid, message_name) {
        
 //        $("#console_div").html(new Date().getTime().toString() + "/" + msg)
        update_ui(msg)
+       after_process()
     },
    error : control_error_handler
   }
@@ -92,5 +119,6 @@ function control_error_handler(msg) {
         alert( "controller oyj")
 
     }
+    after_process()
 
 }
