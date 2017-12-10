@@ -114,25 +114,119 @@ function del_process(req,res) {
 } 
 module.exports.del_process = del_process
 
-var list_of_if_numbers = "#list_of_if_numbes";
+var list_of_if = "#list_of_if";
 var redis_key_if_numbers_name = "if_name";
 var redis_key_if_numbers_disp_name = "if_disp_name";
+var redis_key_if_kind = "if_kind";
 var redis_key_number_unit = "unit";
 var redis_key_number_scale = "scale";
-function get_if_numbers(req,res) {
-    client.lrange(list_of_if_numbers, 0, -1, function (error, items) {
+var redis_key_arrows_enable = "enable";
+var redis_key_button_on = "on";
+var redis_key_button_off = "off";
+function get_ifs(req,res) {
+    client.lrange(list_of_if, 0, -1, function (error, items) {
         sendJson(res,items);
 
     })
 } 
-module.exports.get_if_numbers = get_if_numbers
-function put_if_numbers(req,res) {
+module.exports.get_ifs = get_ifs
+function put_if(req,res) {
+    if (req.param("if_kind") == "if_numbers") {
+         put_if_num(req,res)
+    } else if (req.param("if_kind") == "if_messages") {
+         put_if_message_log(req,res)
+    }else if (req.param("if_kind") == "if_logs") {
+         put_if_message_log(req,res)
+    }else if (req.param("if_kind") == "if_arrows") {
+         put_if_arrow(req,res)
+    } else if (req.param("if_kind") == "if_toggles") {
+         put_if_toggle(req,res)
+    } else if (req.param("if_kind") == "if_buttons") {
+         put_if_button(req,res)
+    } else {
+        res.writeHead("500")
+        res.write("kind is invalid")
+        res.end()
+    }
+}
+function put_if_button(req,res) {
+    var if_numbers_disp_name = req.param("if_disp_name")
+    var on = isEmpty(req.param("on")) ? "on" : req.param("on")
+    var off = isEmpty(req.param("off")) ? "off" : req.param("off")
+    var if_kind = req.param("if_kind")
+ client.hmset(req.resource_id, 
+        redis_key_if_numbers_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_numbers_disp_name) ? req.resource_id : if_numbers_disp_name),
+        redis_key_button_off, 
+        off, 
+        redis_key_button_on, 
+        on, 
+        redis_key_if_kind, 
+        if_kind
+    );
+    client.rpush(list_of_if,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+function put_if_toggle(req,res) {
+    var if_numbers_disp_name = req.param("if_disp_name")
+    var status = req.param("status")
+    var if_kind = req.param("if_kind")
+    if (status == undefined || !Array.isArray(status)) {
+        res.writeHead("500")
+        res.write("status is required")
+        res.end()
+        return
+    }
+    client.hmset(req.resource_id, 
+        redis_key_if_numbers_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_numbers_disp_name) ? req.resource_id : if_numbers_disp_name),
+        redis_key_if_kind, 
+        if_kind
+    );
+    status.forEach(function(item) {
+        client.rpush(req.resource_id + "/status",item)
+    })
+    client.rpush(list_of_if,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+function put_if_arrow(req,res) {
+    var if_numbers_disp_name = req.param("if_disp_name")
+    var enable = isEmpty(req.param("enable")) ? "trdl" : req.param("enable")
+    var if_kind = req.param("if_kind")
+    if (["trdl","lr","td"].indexOf(enable) < 0) {
+        res.writeHead("500")
+        res.write("trdl,lr,td is required")
+        res.end()
+        return
+    }
+    client.hmset(req.resource_id, 
+        redis_key_if_numbers_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_numbers_disp_name) ? req.resource_id : if_numbers_disp_name),
+        redis_key_arrows_enable, 
+        enable,
+        redis_key_if_kind, 
+        if_kind
+    );
+    client.rpush(list_of_if,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+function put_if_num(req,res) {
     var if_numbers_disp_name = req.param("if_disp_name")
     var unit = isEmpty(req.param("unit")) ? "" : req.param("unit")
     var scale = isEmpty(req.param("scale")) ? 0 : req.param("scale")
+    var if_kind = req.param("if_kind")
     if (!isNumber(scale)) {
-        req.writeHead("500")
-        req.end()
+        res.writeHead("500")
+        res.end()
         return
     }
     client.hmset(req.resource_id, 
@@ -143,28 +237,45 @@ function put_if_numbers(req,res) {
         redis_key_number_scale, 
         scale,
         redis_key_number_unit, 
-        unit
+        unit,
+        redis_key_if_kind, 
+        if_kind
     );
-    client.rpush(list_of_if_numbers,req.resource_id)
+    client.rpush(list_of_if,req.resource_id)
     res.writeHead(201);
     res.end();
 } 
-module.exports.put_if_numbers = put_if_numbers
-function get_if_number(req,res) {
+function put_if_message_log(req,res) {
+    var if_numbers_disp_name = req.param("if_disp_name")
+    var if_kind = req.param("if_kind")
+    client.hmset(req.resource_id, 
+        redis_key_if_numbers_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_numbers_disp_name) ? req.resource_id : if_numbers_disp_name),
+        redis_key_if_kind, 
+        if_kind
+    );
+    client.rpush(list_of_if,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+module.exports.put_if = put_if
+function get_if(req,res) {
     client.hgetall(req.resource_id, function(err, data) {
         sendJson(res,data);
     });
 } 
-module.exports.get_if_number = get_if_number
-function del_if_number(req,res) {
+module.exports.get_if = get_if
+function del_if(req,res) {
     client.del(req.resource_id, function (error, items) {
-        client.lrem(list_of_if_numbers, 1, req.resource_id)
+        client.lrem(list_of_if, 1, req.resource_id)
         res.writeHead(200);
         res.end();
 
     })
 } 
-module.exports.del_if_number = del_if_number
+module.exports.del_if = del_if
 
 
 

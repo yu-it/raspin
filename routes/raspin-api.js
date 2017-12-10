@@ -11,15 +11,10 @@ var url_processes =                  "/machines/:machine_name/processes/"
 var url_process =                    "/machines/:machine_name/processes/:process_name"
 var url_check_invalid_process_name = "/machines/:machine_name/processes/:process_name/*"
 //var url_if =                         "/machines/:machine_name/processes/:process_name/if"
-var url_if_numbers =                  "/machines/:machine_name/processes/:process_name/if_numbers"
-var url_if_number =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_message_if =                 "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_log_if =                     "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_arrow_if =                   "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_toggle_if =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_button_if =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
-var url_disable_rules =              "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name/disable_rules"
-var url_hiding_rules =               "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name/hiding_rules"
+var url_ifs =                  "/machines/:machine_name/processes/:process_name/:if_kind(if_(numbers|messages|logs|arrows|toggles|buttons))"
+var url_if =                  "/machines/:machine_name/processes/:process_name/:if_kind(if_(numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_disable_rules =              "/machines/:machine_name/processes/:process_name/:if_kind(if_(numbers|messages|logs|arrows|toggles|buttons))/:if_name/disable_rules"
+var url_hiding_rules =               "/machines/:machine_name/processes/:process_name/:if_kind(if_(numbers|messages|logs|arrows|toggles|buttons))/:if_name/hiding_rules"
 
 function check_resource(req,res,next) {
   req_log(req)
@@ -100,27 +95,27 @@ router.delete(url_process, function(req, res, next) {
   })
 //以下のものは親processの存在が前提になる。
 router.use(url_check_invalid_process_name, check_resource)
-router.get(url_if_numbers, function(req, res, next) {
+router.get(url_ifs, function(req, res, next) {
   req_log(req)
-  logics.get_if_numbers(req,res);
+  logics.get_ifs(req,res);
 });
 
 //if
-router.put(url_if_number, function(req, res, next) {
+router.put(url_if, function(req, res, next) {
   req_log(req)
   logics.check_resource(req,
     res,
     req.resource_id,
     return_200,
-    logics.put_if_numbers);
+    logics.put_if);
 });
-router.get(url_if_number, function(req, res, next) {
+router.get(url_if, function(req, res, next) {
   req_log(req)
-    logics.get_if_number(req,res)
+    logics.get_if(req,res)
   })
-router.delete(url_if_number, function(req, res, next) {
+router.delete(url_if, function(req, res, next) {
   req_log(req)
-    logics.del_if_number(req,res)
+    logics.del_if(req,res)
   })
 
 

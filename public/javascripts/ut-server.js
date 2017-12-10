@@ -84,14 +84,31 @@ function ut_server() {
     no9_processes_test_containing_process()
     no10_get_process_test();
     no11_del_process_test();
-    no12_if_test_empty();
-    no14_put_if_num_test();
-    no15_if_nums_test_containing_if()
-    no16_get_if_nums_test()
-    no17_del_if_nums_test()
+    var param = {
+        "numbers":{"scale":2,"unit":"%"},
+        "message":{},
+        "logs":{},
+        "arrows":{"enable":"lr"},
+        "toggles":{"status":["a","b","c"]},
+        "buttons":{"on":"on", "off":"off"}
+    };
+    ["numbers","messages","logs","arrows","toggles","buttons"].forEach(function (item) {
+        no12_if_test_empty(item, param[item]);
+        no14_put_if_test(item, param[item]);
+        no15_if_test_containing_if(item, param[item])
+        no16_get_if_test(item, param[item])
+        no17_del_if_test(item, param[item])
+        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + item + "/" + item + "if_1",
+        function(e, xhr, settings){
+        });
+        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + item + "/" + item + "if_2",
+        function(e, xhr, settings){
+        });
+
+    })
 }
-function no17_del_if_nums_test() {
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_del",
+function no17_del_if_test(kind) {
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
             log("test17 put_if_deltest(for deltest) (in)")
             if(e.status === 201){
@@ -100,7 +117,7 @@ function no17_del_if_nums_test() {
                 ng(e, xhr, [])
             }
         });
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_del",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
             log("test17 get_if_deltest(for deltest) (in)")
             if(e.status === 200){
@@ -109,9 +126,9 @@ function no17_del_if_nums_test() {
                 ng(e, xhr, [])
             }
         });
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
-            log("test17 get_if_numbers(for deltest) (in)")
+            log("test17 get_if_" + kind + "(for deltest) (in)")
             try{
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && obj.length == 3){
@@ -125,16 +142,16 @@ function no17_del_if_nums_test() {
 
             }
         });
-    http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_del",
+    http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
-            log("test17 del_if_numbers (in)")
+            log("test17 del_if_" + kind + " (in)")
             if(e.status === 200){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
         });
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_del",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
             log("test17 check_proc_c_delete(for deltest) (in)")
             if(e.status === 404){
@@ -143,28 +160,34 @@ function no17_del_if_nums_test() {
                 ng(e, xhr, [])
             }
         });
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
             log("test17 check_procs(for deltest) (in)")
-            var obj = JSON.parse(e.responseText)
-            if(e.status === 200 && obj.length == 2){
-                ok(e, xhr, [])
-            }else{
+            try {
+                var obj = JSON.parse(e.responseText)
+                if(e.status === 200 && obj.length == 2){
+                    ok(e, xhr, [])
+                }else{
+                    ng(e, xhr, [])
+                }
+
+            } catch(ex) {
                 ng(e, xhr, [])
+
             }
         });
 }
-function no16_get_if_nums_test() {
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_1",
+function no16_get_if_test(kind, params) {
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
             log("test16 numif_1(in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && 
-                    obj["if_name"] == "/machines/machine_a/processes/proc_a/if_numbers/numif_1" && 
-                    obj["if_disp_name"] == "/machines/machine_a/processes/proc_a/if_numbers/numif_1" &&
-                    obj["unit"] == "" &&
-                    obj["scale"] == 0){
+                    obj["if_name"] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1" && 
+                    obj["if_disp_name"] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1" &&
+                    obj["if_kind"] == "if_" + kind + "" &&
+                    params){
                     ok(e, xhr, [])
                     
                 } else {
@@ -176,16 +199,21 @@ function no16_get_if_nums_test() {
             }        
         
         });
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_2",
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
             log("test16 numif_2(in)")
             try {
                 var obj = JSON.parse(e.responseText)
+                var additional_params_ok = true;
+                for (k in params) {
+                    if (obj[k].indexOf(params[k]) < 0) {
+                        additional_params_ok = false;
+                    }
+                }
                 if(e.status === 200 && 
-                    obj["if_name"] == "/machines/machine_a/processes/proc_a/if_numbers/numif_2" && 
+                    obj["if_name"] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2" && 
                     obj["if_disp_name"] == "if_disp_b" &&
-                    obj["scale"] == "2" &&
-                    obj["unit"] == "%"){
+                    obj["if_kind"] == "if_" + kind + "" && additional_params_ok){
                     ok(e, xhr, [])
                     
                 } else {
@@ -197,7 +225,7 @@ function no16_get_if_nums_test() {
             }        
         
         });
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_3",
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_3",
         function(e, xhr, settings){
             log("test16 num_if存在しないifに対して(in)")
             try {
@@ -213,7 +241,7 @@ function no16_get_if_nums_test() {
             }        
         
         });
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_numbers/numif_2",
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
             log("test16 num_if存在しないifに対して(in)")
             try {
@@ -229,7 +257,7 @@ function no16_get_if_nums_test() {
             }        
         
         });
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_numbers/numif_2",
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
             log("test16 num_if存在しないプロセスに対して(in)")
             try {
@@ -245,7 +273,7 @@ function no16_get_if_nums_test() {
             }        
         
         });
-        http_get("http://localhost:3000/raspin/internal/machines/machine_c/processes/proc_a/if_numbers/numif_1",
+        http_get("http://localhost:3000/raspin/internal/machines/machine_c/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
             log("test16 num_if存在しないマシンに対して(in)")
             try {
@@ -263,15 +291,15 @@ function no16_get_if_nums_test() {
         });
 
 }
-function no15_if_nums_test_containing_if() {
-        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers",
+function no15_if_test_containing_if(kind) {
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
-            log("test15 if_numbers_リスト取得テスト(in)")
+            log("test15 if_" + kind + "_リスト取得テスト(in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && 
-                    obj[0] == "/machines/machine_a/processes/proc_a/if_numbers/numif_1" && 
-                    obj[1] == "/machines/machine_a/processes/proc_a/if_numbers/numif_2"){
+                    obj[0] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1" && 
+                    obj[1] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2"){
                     ok(e, xhr, [])
                     
                 } else {
@@ -284,8 +312,8 @@ function no15_if_nums_test_containing_if() {
         });
 
 }
-function no14_put_if_num_test() {
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_1",
+function no14_put_if_test(kind, params) {
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
             log("test14 put_numif_1 (in)")
             if(e.status === 201){
@@ -294,7 +322,7 @@ function no14_put_if_num_test() {
                 ng(e, xhr, [])
             }
         });
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_1",
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
             log("test14 put_numif_1(exists)(in)")
             if(e.status === 200){
@@ -303,7 +331,20 @@ function no14_put_if_num_test() {
                 ng(e, xhr, [])
             }
         });
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_2?if_disp_name=if_disp_b&unit=%&scale=2",
+
+    var additional_params = "";
+    for (k in params) {
+        
+        if (Array.isArray(params[k])) {
+            params[k].forEach(function(item) {
+                additional_params += "&" + k + "=" + item
+            })            
+        } else {
+                additional_params += "&" + k + "=" + params[k]
+
+        }
+    }
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&" + additional_params,
         function(e, xhr, settings){
             log("test14 put_numif_2")
             if(e.status === 201){
@@ -312,7 +353,7 @@ function no14_put_if_num_test() {
                 ng(e, xhr, [])
             }
         });
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/numif_2?if_disp_name=if_disp_b&unit=%&scale=2",
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2?a=b" + additional_params,
         function(e, xhr, settings){
             log("test14 put_numif_2(exists)")
             if(e.status === 200){
@@ -321,7 +362,7 @@ function no14_put_if_num_test() {
                 ng(e, xhr, [])
             }
         });
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_d/if_numbers/numif_2?if_disp_name=if_disp_b&unit=%&scale=2",
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_d/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&unit=%&scale=2",
         function(e, xhr, settings){
             log("test14 put_numif_2(存在しないプロセスに対して)")
             if(e.status === 404){
@@ -330,7 +371,7 @@ function no14_put_if_num_test() {
                 ng(e, xhr, [])
             }
         });
-    http_put("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_d/if_numbers/numif_2?if_disp_name=if_disp_b&unit=%&scale=2",
+    http_put("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_d/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&unit=%&scale=2",
         function(e, xhr, settings){
             log("test14 put_numif_2(存在しないマシンに対して)")
             if(e.status === 404){
@@ -340,8 +381,8 @@ function no14_put_if_num_test() {
             }
         });
 }
-function no12_if_test_empty() {
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers",
+function no12_if_test_empty(kind) {
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
      function(e, xhr, settings){
             log("no12_if_test_empty")
             if(e.status === 200) {
@@ -351,7 +392,7 @@ function no12_if_test_empty() {
 
             }
         })
-    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_numbers",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "",
      function(e, xhr, settings){
             log("no12_if_test_empty(存在しないプロセス)")
             if(e.status === 404) {
@@ -361,7 +402,7 @@ function no12_if_test_empty() {
 
             }
         })
-    http_get("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_a/if_number",
+    http_get("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_a/if_" + kind + "",
      function(e, xhr, settings){
             log("no12_if_test_empty(存在しないマシン)")
             if(e.status === 404) {
