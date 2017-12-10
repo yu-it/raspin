@@ -1,13 +1,129 @@
 var express = require('express');
 var logics = require('../private-logics/raspin-api.logic');
 var router = express.Router();
+var url = require('url'); // built-in utility
 
-var res_OK = JSON.stringify({"ret":"ok"})
-var res_NG = JSON.stringify({"ret":"ng"})
-//http://localhost:3000/raspin-api/ping
-router.get('/ping', function(req, res, next) {
-  res.send(res_OK)
+var url_ping =                       "/ping"
+var url_machines =                   "/machines"
+var url_machine =                    "/machines/:machine_name"
+var url_check_invalid_machine_name = "/machines/:machine_name/*"
+var url_processes =                  "/machines/:machine_name/processes/"
+var url_process =                    "/machines/:machine_name/processes/:process_name"
+var url_check_invalid_process_name = "/machines/:machine_name/processes/:process_name/*"
+//var url_if =                         "/machines/:machine_name/processes/:process_name/if"
+var url_if_numbers =                  "/machines/:machine_name/processes/:process_name/if_numbers"
+var url_if_number =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_message_if =                 "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_log_if =                     "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_arrow_if =                   "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_toggle_if =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_button_if =                  "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name"
+var url_disable_rules =              "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name/disable_rules"
+var url_hiding_rules =               "/machines/:machine_name/processes/:process_name/if_((numbers|messages|logs|arrows|toggles|buttons))/:if_name/hiding_rules"
+
+function check_resource(req,res,next) {
+  req_log(req)
+  logics.check_resource(req,
+    res,
+    req.resource_id .replace("/"+req.param(0),""),
+    function(){next()},
+    return_404)
+}
+function req_log(req) {
+  log("method:" + req.method + " " + req.originalUrl + "(" + req.path + ")#" + req.resource_id)
+}
+function log(str) {
+  console.log(str)
+}
+
+function return_200(req,res) {
+  res.writeHead(200);
+  res.end();
+}
+function return_404(req,res) {
+  res.writeHead(404);
+  res.end();
+}
+router.get(url_ping, function(req, res, next) {
+  req_log(req)
+  res.writeHead(200);
+  res.end();
 });
+router.get(url_machines, function(req, res, next) {
+  req_log(req)
+  logics.get_machines(req,res);
+});
+router.put(url_machine, function(req, res, next) {
+  req_log(req)
+  logics.check_resource(req,
+    res,
+    req.resource_id,
+    return_200,
+    logics.put_machine);
+});
+
+router.get(url_machine, function(req, res, next) {
+  req_log(req)
+  logics.get_machine(req,res);
+});
+
+router.delete(url_machine, function(req, res, next) {
+  req_log(req)
+  logics.delete_machine(req,res, next);
+});
+
+//以下のものは親machineの存在が前提になる。
+router.use(url_check_invalid_machine_name, check_resource)
+//processs
+router.get(url_processes, function(req, res, next) {
+  req_log(req)
+    logics.get_processes(req,res)
+  }
+)
+
+//processs
+router.put(url_process, function(req, res, next) {
+  req_log(req)
+  logics.check_resource(req,
+    res,
+    req.resource_id,
+    return_200,
+    logics.put_process);
+});
+router.get(url_process, function(req, res, next) {
+  req_log(req)
+    logics.get_process(req,res)
+  })
+router.delete(url_process, function(req, res, next) {
+  req_log(req)
+    logics.del_process(req,res)
+  })
+//以下のものは親processの存在が前提になる。
+router.use(url_check_invalid_process_name, check_resource)
+router.get(url_if_numbers, function(req, res, next) {
+  req_log(req)
+  logics.get_if_numbers(req,res);
+});
+
+//if
+router.put(url_if_number, function(req, res, next) {
+  req_log(req)
+  logics.check_resource(req,
+    res,
+    req.resource_id,
+    return_200,
+    logics.put_if_numbers);
+});
+router.get(url_if_number, function(req, res, next) {
+  req_log(req)
+    logics.get_if_number(req,res)
+  })
+router.delete(url_if_number, function(req, res, next) {
+  req_log(req)
+    logics.del_if_number(req,res)
+  })
+
+
 
 //http://localhost:3000/raspin-api/SendToController?pvid=1&message=on&arg=1
 router.get('/SendToController', function(req, res, next) {

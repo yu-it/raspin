@@ -6,18 +6,12 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var raspin_main = require('./routes/raspin-main');
 var raspin_api = require('./routes/raspin-api');
+var raspin_api_preprocess = require('./routes/raspin-api-preprocess');
 var ui_controller = require('./routes/ui-controller');
-var ui_data = require('./routes/ui-data');
-var arbitary_test = require('./routes/arbitary_test');
+var ut = require('./routes/ut');
 
 var app = express();
-
-//initialize mongo-db
-const execSync = require('child_process').exec;
-const result =  execSync('mongo ./private-logics/stored_proc.js');
-console.log(result);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -31,11 +25,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', raspin_main);
-app.use('/raspin-api', raspin_api);
-app.use('/ui-controller', ui_controller);
-app.use('/ui-data', ui_data);
-app.use('/test', arbitary_test);
+app.use('/raspin', raspin_api_preprocess);
+app.use('/raspin/:aspect/', raspin_api);
+app.use('/raspin-ut', ut);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

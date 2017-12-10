@@ -1,4 +1,175 @@
 var pug =require("pug")
+var client = require('redis').createClient();
+var redis_id_machines = "#list_of_machines";
+var redis_key_machine_name = "machine_name";
+var redis_key_machine_disp_name = "machine_disp_name";
+function isEmpty(str) {
+    return str == undefined;
+}
+
+function isNumber(x){ 
+    if( typeof(x) != 'number' && typeof(x) != 'string' )
+        return false;
+    else 
+        return (x == parseFloat(x) && isFinite(x));
+}
+function sendJson(res, data, send404 ) {
+    if (send404 == undefined) {
+        send404 = true;
+    }
+    if (send404 && data == undefined) {
+        res.writeHead(404);
+        res.end();
+    } else {
+        res.send(JSON.stringify(data));
+
+    }
+}
+
+function get_machines(req,res) {
+    client.lrange(redis_id_machines, 0, -1, function (error, items) {
+        sendJson(res,items);
+
+    })
+} 
+module.exports.put_machine = put_machine
+module.exports.check_resource = check_resource
+module.exports.get_machines = get_machines
+module.exports.get_machine = get_machine
+module.exports.delete_machine = delete_machine
+function check_resource(req,res, target, exists, not_exists) {
+    log("check:" + target)
+    client.exists(target, function(err, reply) {
+        if (reply === 1) {
+            exists(req,res)
+        } else {
+            not_exists(req,res);
+        }
+    });
+} 
+function put_machine(req,res) {
+    res.writeHead(201);
+    var machine_disp_name = req.param("machine_disp_name")
+    redis_disp_name = req.param("machine_disp_name")
+    client.hmset(req.resource_id, 
+        redis_key_machine_name, 
+        req.resource_id,
+        redis_key_machine_disp_name, 
+        (isEmpty(machine_disp_name) ? req.resource_id : machine_disp_name));
+    client.rpush(redis_id_machines,req.resource_id)
+    res.end()
+} 
+function get_machine(req,res) {
+    client.hgetall(req.resource_id, function(err, data) {
+        sendJson(res,data);
+    });
+} 
+function delete_machine(req,res) {
+    client.del(req.resource_id, function (error, items) {
+        client.lrem(redis_id_machines, 1, req.resource_id)
+        res.writeHead(200);
+        res.end();
+
+    })
+} 
+
+//processes
+var redis_id_processes = "#list_of_processes";
+var redis_key_process_name = "process_name";
+var redis_key_process_disp_name = "process_disp_name";
+function get_processes(req,res) {
+    client.lrange(redis_id_processes, 0, -1, function (error, items) {
+        sendJson(res,items);
+
+    })
+} 
+module.exports.get_processes = get_processes
+
+//process
+function put_process(req,res) {
+    var process_disp_name = req.param("process_disp_name")
+    client.hmset(req.resource_id, 
+        redis_key_process_name, 
+        req.resource_id,
+        redis_key_process_disp_name, 
+        (isEmpty(process_disp_name) ? req.resource_id : process_disp_name));
+    client.rpush(redis_id_processes,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+module.exports.put_process = put_process
+function get_process(req,res) {
+    client.hgetall(req.resource_id, function(err, data) {
+        sendJson(res,data);
+    });
+} 
+module.exports.get_process = get_process
+function del_process(req,res) {
+    client.del(req.resource_id, function (error, items) {
+        client.lrem(redis_id_processes, 1, req.resource_id)
+        res.writeHead(200);
+        res.end();
+
+    })
+} 
+module.exports.del_process = del_process
+
+var list_of_if_numbers = "#list_of_if_numbes";
+var redis_key_if_numbers_name = "if_name";
+var redis_key_if_numbers_disp_name = "if_disp_name";
+var redis_key_number_unit = "unit";
+var redis_key_number_scale = "scale";
+function get_if_numbers(req,res) {
+    client.lrange(list_of_if_numbers, 0, -1, function (error, items) {
+        sendJson(res,items);
+
+    })
+} 
+module.exports.get_if_numbers = get_if_numbers
+function put_if_numbers(req,res) {
+    var if_numbers_disp_name = req.param("if_disp_name")
+    var unit = isEmpty(req.param("unit")) ? "" : req.param("unit")
+    var scale = isEmpty(req.param("scale")) ? 0 : req.param("scale")
+    if (!isNumber(scale)) {
+        req.writeHead("500")
+        req.end()
+        return
+    }
+    client.hmset(req.resource_id, 
+        redis_key_if_numbers_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_numbers_disp_name) ? req.resource_id : if_numbers_disp_name),
+        redis_key_number_scale, 
+        scale,
+        redis_key_number_unit, 
+        unit
+    );
+    client.rpush(list_of_if_numbers,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+module.exports.put_if_numbers = put_if_numbers
+function get_if_number(req,res) {
+    client.hgetall(req.resource_id, function(err, data) {
+        sendJson(res,data);
+    });
+} 
+module.exports.get_if_number = get_if_number
+function del_if_number(req,res) {
+    client.del(req.resource_id, function (error, items) {
+        client.lrem(list_of_if_numbers, 1, req.resource_id)
+        res.writeHead(200);
+        res.end();
+
+    })
+} 
+module.exports.del_if_number = del_if_number
+
+
+
+
+
 
 function log(str){
 	var d = new Date();
