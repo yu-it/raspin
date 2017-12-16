@@ -1,0 +1,13 @@
+doctype html
+html
+  head
+   style
+    include ../public/stylesheets/raspin-main.css
+
+  body
+   p webconsole powered by #{title}
+   script(src="javascripts/jquery-3.1.1.js")
+   script(src="javascripts/frame_of_ui.js")
+   // - div(class='div-class', (click)='play()')
+   div#main
+   div#console_div

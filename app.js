@@ -8,7 +8,8 @@ var bodyParser = require('body-parser');
 
 var raspin_api = require('./routes/raspin-api');
 var raspin_api_preprocess = require('./routes/raspin-api-preprocess');
-var ui_controller = require('./routes/ui-controller');
+//var ui_controller = require('./routes/ui-controller');
+var ui = require('./routes/ui');
 var ut = require('./routes/ut');
 
 var app = express();
@@ -28,6 +29,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/raspin', raspin_api_preprocess);
 app.use('/raspin/:aspect/', raspin_api);
 app.use('/raspin-ut', ut);
+app.use('/raspin/ui', ui);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
