@@ -41,14 +41,16 @@ function ok(e, str, arrays) {
     log("<li>" + str)
     log("<br/>");
 }
-function http_put(arg_url, complete_func) {
-    var res = $.ajax(
-    {
+function http_put(arg_url, complete_func, body_data) {
+    param = {
         url:arg_url,
         method:"PUT",
         async:false
-        
-    })
+    }
+    if (body_data != undefined) {
+        param["data"] = body_data;
+    }
+    var res = $.ajax(param)
     complete_func(res,arg_url,"")
     
 }
@@ -86,40 +88,278 @@ function ut_server() {
     no11_del_process_test();
     var param = {
         "numbers":{"scale":2,"unit":"%"},
-        "message":{},
-        "logs":{},
+        "message":undefined,
+        "logs":undefined,
         "arrows":{"enable":"lr"},
         "toggles":{"status":["a","b","c"]},
         "buttons":{"on":"on", "off":"off"}
     };
-    ["numbers","messages","logs","arrows","toggles","buttons"].forEach(function (item) {
-        no12_if_test_empty(item, param[item]);
-        no14_put_if_test(item, param[item]);
-        no15_if_test_containing_if(item, param[item])
-        no16_get_if_test(item, param[item])
-        no17_del_if_test(item, param[item])
-        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + item + "/" + item + "if_1",
+    var num = 12;
+    ["numbers","messages","logs","arrows","toggles","buttons"].forEach(function (kind) {
+        noXX_1_if_test_empty(num, kind, param[kind]);
+        num ++;
+        noXX_2_put_if_test(num, kind, param[kind]);
+        num ++;
+        noXX_3_if_test_containing_if(num, kind, param[kind])
+        num ++;
+        noXX_4_get_if_test(num, kind, param[kind])
+        num ++;
+        noXX_5_del_if_test(num, kind, param[kind])
+        num ++;
+        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
         });
-        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + item + "/" + item + "if_2",
+        http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
         });
 
     })
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/hiding_rules")
+    num ++;
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/hiding_rules")
+    num ++;
+    //テスト用IFの登録
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_a",function(e, xhr, settings){
+    
+    },param["numbers"])
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_a/hiding_rules")
+    num ++;
+
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/disable_rules")
+    num ++;
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/disable_rules")
+    num ++;
+    noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_a/disable_rules")
+    num ++;
+    noXX_put_data(num,"http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_a")
+
+    
 }
-function no17_del_if_test(kind) {
-    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
+function noXX_put_data(num,baseUrl) {
+    http_get(baseUrl + "/data",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ非存在テスト")
+        if(e.status === 404){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    http_put(baseUrl + "/data",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ登録テスト")
+        if(e.status === 200){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    },{"data":1000});
+    http_get(baseUrl + "/data",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ1件登録テスト")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+        obj[0] == 1000){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+
+    http_put(baseUrl + "/data",
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule登録テスト(2つ目)")
+        if(e.status === 200){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    },{"data":2000});
+    http_get(baseUrl + "/data",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ2件登録テスト")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+        obj[0] == 2000){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    for (var i = 3; i <= 10; i++) {
+        http_put(baseUrl + "/data",
         function(e, xhr, settings){
-            log("test17 put_if_deltest(for deltest) (in)")
-            if(e.status === 201){
+            log("test" + num + " IFデータ登録テスト" + i + "件目")
+            if(e.status === 200){
+                ok(e, xhr, [])
+            }else{
+                ng(e, xhr, [])
+            }
+        },{"data":1000 * i});
+    }
+    http_get(baseUrl + "/data?from=3&to=7",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ断面取得テスト(途中一部スライス)")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+        obj[0] == 4000 && 
+        obj[1] == 5000 &&
+        obj[2] == 6000 &&
+        obj[3] == 7000 &&
+        obj[4] == 8000){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    http_get(baseUrl + "/data?from=8&to=20",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ断面取得テスト(toがはみ出)")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+            obj[0] == 9000 && 
+            obj[1] == 10000 &&
+            obj.length == 2){
+                ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+
+    http_get(baseUrl + "/data?from=7",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ断面取得テスト(fromのみ指定)")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+            obj[0] == 8000 && 
+            obj[1] == 9000 && 
+            obj[2] == 10000 &&
+            obj.length == 3){
+                ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+
+    http_get(baseUrl + "/data?to=3",
+    function(e, xhr, settings){
+        log("test" + num + " IFデータ断面取得テスト(toのみ指定)")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+            obj[0] == 1000 && 
+            obj[1] == 2000 && 
+            obj[2] == 3000 &&
+            obj[3] == 4000 &&
+            obj.length == 4){
+                ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+
+}
+
+
+function noXX_hiding_disable_rule(num,baseUrl) {
+    http_get(baseUrl,
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule非存在テスト")
+        if(e.status === 404){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    http_put(baseUrl + "/machines/machine_a/processes/proc_a/ifs/if_a/data/on",
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule登録テスト")
+        if(e.status === 200){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    },);
+    http_put(baseUrl + "/machines/machine_a/processes/proc_a/ifs/if_a/data/off",
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule登録テスト(2つ目)")
+        if(e.status === 200){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    },);
+    http_get(baseUrl,
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule取得")
+        try {
+            var obj = JSON.parse(e.responseText)
+        }catch (ex) {
+            var obj =["",""]
+        }
+        if(e.status === 200 && 
+            obj[0] == "/machines/machine_a/processes/proc_a/ifs/if_a/data/on" &&
+            obj[1] == "/machines/machine_a/processes/proc_a/ifs/if_a/data/off"){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    http_del(baseUrl,
+    function(e, xhr, settings){
+        log("test" + num + " hiding_rule一括削除")
+        if(e.status === 200){
+            ok(e, xhr, [])
+        }else{
+            ng(e, xhr, [])
+        }
+    });
+    http_get(baseUrl,
+        function(e, xhr, settings){
+            log("test" + num + " hiding_rule非存在テスト")
+            if(e.status === 404){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
         });
+    }
+function noXX_5_del_if_test(num, kind, params) {
+    http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
+        function(e, xhr, settings){
+            log("test" + num + " put_if_deltest(for deltest) (in)")
+            if(e.status === 201){
+                ok(e, xhr, [])
+            }else{
+                ng(e, xhr, [])
+            }
+        }, params);
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
-            log("test17 get_if_deltest(for deltest) (in)")
+            log("test" + num + " get_if_deltest(for deltest) (in)")
             if(e.status === 200){
                 ok(e, xhr, [])
             }else{
@@ -128,7 +368,7 @@ function no17_del_if_test(kind) {
         });
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
-            log("test17 get_if_" + kind + "(for deltest) (in)")
+            log("test" + num + " get_if_" + kind + "(for deltest) (in)")
             try{
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && obj.length == 3){
@@ -144,7 +384,7 @@ function no17_del_if_test(kind) {
         });
     http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
-            log("test17 del_if_" + kind + " (in)")
+            log("test" + num + " del_if_" + kind + " (in)")
             if(e.status === 200){
                 ok(e, xhr, [])
             }else{
@@ -153,7 +393,7 @@ function no17_del_if_test(kind) {
         });
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/if_del",
         function(e, xhr, settings){
-            log("test17 check_proc_c_delete(for deltest) (in)")
+            log("test" + num + " check_proc_c_delete(for deltest) (in)")
             if(e.status === 404){
                 ok(e, xhr, [])
             }else{
@@ -162,7 +402,7 @@ function no17_del_if_test(kind) {
         });
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
-            log("test17 check_procs(for deltest) (in)")
+            log("test" + num + " check_procs(for deltest) (in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && obj.length == 2){
@@ -177,21 +417,33 @@ function no17_del_if_test(kind) {
             }
         });
 }
-function no16_get_if_test(kind, params) {
+function check_param_and_response(res, param) {
+    for (k in param) {
+        if (param[k] != res[k]) {
+            return false
+        }
+    }
+    return true;
+}
+function noXX_4_get_if_test(num, kind, params) {
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
-            log("test16 numif_1(in)")
+            log("test" + num + " numif_1(in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && 
                     obj["if_name"] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1" && 
                     obj["if_disp_name"] == "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1" &&
-                    obj["if_kind"] == "if_" + kind + "" &&
-                    params){
+                    obj["if_kind"] == "if_" + kind + ""){
                     ok(e, xhr, [])
                     
                 } else {
-                    ng(e, xhr, [])
+                    ng(e, xhr, ["predict ifname:/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
+                    "predict if_disp_name:/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
+                    "predict if_kind:if_" + kind + "",
+                    "actual ifname:"+obj["if_name"],
+                    "actual if_disp_name:"+obj["if_disp_name"],
+                    "actual if_kind:"+obj["if_kind"]])
                 }
             }catch (ex) {
                 ng(e, xhr, [])
@@ -201,12 +453,16 @@ function no16_get_if_test(kind, params) {
         });
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
-            log("test16 numif_2(in)")
+            log("test" + num + " numif_2(in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 var additional_params_ok = true;
+                var ngList = []
                 for (k in params) {
-                    if (obj[k].indexOf(params[k]) < 0) {
+                    
+                    if (!(k in obj) || obj[k].toString() != params[k].toString()) {
+                        ngList.push("predict " + k + " = " + params[k])
+                        ngList.push("actual " + k + " = " + (k in obj) ? obj[k] : "-not exists-")
                         additional_params_ok = false;
                     }
                 }
@@ -217,17 +473,23 @@ function no16_get_if_test(kind, params) {
                     ok(e, xhr, [])
                     
                 } else {
-                    ng(e, xhr, [])
+                    ngList.push("predict if_name = " + obj["if_name"] );
+                    ngList.push("predict if_disp_name = " + obj["if_disp_name"] );
+                    ngList.push("predict if_kind = " + obj["if_kind"] );
+                    ngList.push("actual if_name = " + "/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2");
+                    ngList.push("actual if_disp_name = " + "if_disp_b");
+                    ngList.push("actual if_kind = " + "if_" + kind);
+                    ng(e, xhr, ngList)
                 }
             }catch (ex) {
-                ng(e, xhr, [])
+                ng(e, xhr, ["error"])
                 
             }        
         
         });
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_3",
         function(e, xhr, settings){
-            log("test16 num_if存在しないifに対して(in)")
+            log("test" + num + " num_if存在しないifに対して(in)")
             try {
                 if(e.status === 404){
                     ok(e, xhr, [])
@@ -243,7 +505,7 @@ function no16_get_if_test(kind, params) {
         });
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
-            log("test16 num_if存在しないifに対して(in)")
+            log("test" + num + " num_if存在しないifに対して(in)")
             try {
                 if(e.status === 404){
                     ok(e, xhr, [])
@@ -259,7 +521,7 @@ function no16_get_if_test(kind, params) {
         });
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
-            log("test16 num_if存在しないプロセスに対して(in)")
+            log("test" + num + " num_if存在しないプロセスに対して(in)")
             try {
                 if(e.status === 404){
                     ok(e, xhr, [])
@@ -275,7 +537,7 @@ function no16_get_if_test(kind, params) {
         });
         http_get("http://localhost:3000/raspin/internal/machines/machine_c/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
-            log("test16 num_if存在しないマシンに対して(in)")
+            log("test" + num + " num_if存在しないマシンに対して(in)")
             try {
                 if(e.status === 404){
                     ok(e, xhr, [])
@@ -291,10 +553,10 @@ function no16_get_if_test(kind, params) {
         });
 
 }
-function no15_if_test_containing_if(kind) {
+function noXX_3_if_test_containing_if(num, kind) {
         http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
         function(e, xhr, settings){
-            log("test15 if_" + kind + "_リスト取得テスト(in)")
+            log("test" + num + " if_" + kind + "_リスト取得テスト(in)")
             try {
                 var obj = JSON.parse(e.responseText)
                 if(e.status === 200 && 
@@ -312,25 +574,60 @@ function no15_if_test_containing_if(kind) {
         });
 
 }
-function no14_put_if_test(kind, params) {
+function noXX_2_put_if_test(num, kind, params) {
     http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
-            log("test14 put_numif_1 (in)")
+            log("test" + num + " put_numif_1 (in)")
             if(e.status === 201){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
+    if ( kind == "toggles") {
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1/data",
+        function(e, xhr, settings){
+            try {
+                var obj = JSON.parse(e.responseText)
+            } catch (ex) {
+                var obj = [""]
+            }
+            
+            log("test" + num + " デフォルト確認(toggle) (in)")
+            if(e.status === 200 && obj[0] == params["status"][0]){
+                ok(e, xhr, [])
+            }else{
+                ng(e, xhr, [])
+            }
+        },params);
+        
+    }
+    if ( kind == "buttons") {
+        http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1/data",
+        function(e, xhr, settings){
+            try {
+                var obj = JSON.parse(e.responseText)
+            } catch (ex) {
+                var obj = [""]
+            }
+            log("test" + num + " デフォルト確認 (buttons)(in)")
+            if(e.status === 200 && obj[0] == "off"){
+                ok(e, xhr, [])
+            }else{
+                ng(e, xhr, [])
+            }
+        },params);
+        
+    }
     http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_1",
         function(e, xhr, settings){
-            log("test14 put_numif_1(exists)(in)")
+            log("test" + num + " put_numif_1(exists)(in)")
             if(e.status === 200){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
 
     var additional_params = "";
     for (k in params) {
@@ -346,45 +643,45 @@ function no14_put_if_test(kind, params) {
     }
     http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&" + additional_params,
         function(e, xhr, settings){
-            log("test14 put_numif_2")
+            log("test" + num + " put_numif_2")
             if(e.status === 201){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
     http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2?a=b" + additional_params,
         function(e, xhr, settings){
-            log("test14 put_numif_2(exists)")
+            log("test" + num + " put_numif_2(exists)")
             if(e.status === 200){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
     http_put("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_d/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&unit=%&scale=2",
         function(e, xhr, settings){
-            log("test14 put_numif_2(存在しないプロセスに対して)")
+            log("test" + num + " put_numif_2(存在しないプロセスに対して)")
             if(e.status === 404){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
     http_put("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_d/if_" + kind + "/" + kind + "if_2?if_disp_name=if_disp_b&unit=%&scale=2",
         function(e, xhr, settings){
-            log("test14 put_numif_2(存在しないマシンに対して)")
+            log("test" + num + " put_numif_2(存在しないマシンに対して)")
             if(e.status === 404){
                 ok(e, xhr, [])
             }else{
                 ng(e, xhr, [])
             }
-        });
+        },params);
 }
-function no12_if_test_empty(kind) {
+function noXX_1_if_test_empty(num, kind) {
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "",
      function(e, xhr, settings){
-            log("no12_if_test_empty")
+            log("no" + num + "_if_test_empty")
             if(e.status === 200) {
                 ok(e, xhr, [])
             }else{
@@ -394,7 +691,7 @@ function no12_if_test_empty(kind) {
         })
     http_get("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_c/if_" + kind + "",
      function(e, xhr, settings){
-            log("no12_if_test_empty(存在しないプロセス)")
+            log("no" + num + "_if_test_empty(存在しないプロセス)")
             if(e.status === 404) {
                 ok(e, xhr, [])
             }else{
@@ -404,7 +701,7 @@ function no12_if_test_empty(kind) {
         })
     http_get("http://localhost:3000/raspin/internal/machines/machine_d/processes/proc_a/if_" + kind + "",
      function(e, xhr, settings){
-            log("no12_if_test_empty(存在しないマシン)")
+            log("no" + num + "_if_test_empty(存在しないマシン)")
             if(e.status === 404) {
                 ok(e, xhr, [])
             }else{

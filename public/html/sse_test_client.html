@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>SSE Sample</title>
+</head>
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+<script>
+var es = new EventSource('/raspin/internal/machines/machine_a/processes/proc_a/if_numbers/if_a/data/signal');
+
+es.onmessage = function(event) {
+  $('<div>').text(event.data).appendTo('body');
+  var data = JSON.parse(event.data)
+  param = {
+        url:"http://localhost:3000/raspin/internal/" + data["reply_id"],
+        method:"PUT",
+        async:false
+    }
+  $.ajax(param)
+};
+</script>
+</body>
+</html>
