@@ -11,25 +11,26 @@ var url_processes =                  "/machines/:machine_name/processes/"
 var url_process =                    "/machines/:machine_name/processes/:process_name"
 var url_check_invalid_process_name = "/machines/:machine_name/processes/:process_name/*"
 //var url_if =                       "/machines/:machine_name/processes/:process_name/if"
-var url_ifs =                        "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)"
-var url_if =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name"
+var url_ifs =                        "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)"
+var url_ifs_all =                        "/machines/:machine_name/processes/:process_name/ifs"
+var url_if =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name"
 var url_machine_disable_rules =      "/machines/:machine_name/disable_rules/*"
 var url_machine_hiding_rules =       "/machines/:machine_name/hiding_rules/*"
 var url_process_disable_rules =      "/machines/:machine_name/processes/:process_name/disable_rules/*"
 var url_process_hiding_rules =       "/machines/:machine_name/processes/:process_name/hiding_rules/*"
-var url__if_disable_rules =          "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/disable_rules/*"
-var url_if_hiding_rules =            "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/hiding_rules/*"
-var url_check_invalid_if_name = "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/*"
+var url__if_disable_rules =          "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/disable_rules/*"
+var url_if_hiding_rules =            "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/hiding_rules/*"
+var url_check_invalid_if_name = "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/*"
 
 var url_machine_disable_rules_get_alias =      "/machines/:machine_name/disable_rules"
 var url_machine_hiding_rules_get_alias =       "/machines/:machine_name/hiding_rules"
 var url_process_disable_rules_get_alias =      "/machines/:machine_name/processes/:process_name/disable_rules"
 var url_process_hiding_rules_get_alias =       "/machines/:machine_name/processes/:process_name/hiding_rules"
-var url__if_disable_rules_get_alias =          "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/disable_rules"
-var url_if_hiding_rules_get_alias =            "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/hiding_rules"
-var url_if_data =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/data"
-var url_if_data_signal =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/data/signal"
-var url_if_data_reply =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons)/:if_name/data/reply/:ack_id"
+var url__if_disable_rules_get_alias =          "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/disable_rules"
+var url_if_hiding_rules_get_alias =            "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/hiding_rules"
+var url_if_data =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data"
+var url_if_data_signal =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data/signal"
+var url_if_data_reply =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data/reply/:ack_id"
 
 
 
@@ -114,6 +115,10 @@ router.delete(url_process, function(req, res, next) {
 //以下のものは親processの存在が前提になる。
 router.use(url_check_invalid_process_name, check_resource)
 router.get(url_ifs, function(req, res, next) {
+  req_log(req)
+  logics.get_ifs(req,res);
+});
+router.get(url_ifs_all, function(req, res, next) {
   req_log(req)
   logics.get_ifs(req,res);
 });

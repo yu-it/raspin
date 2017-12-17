@@ -97,6 +97,13 @@ var redis_key_process_name = "process_name";
 var redis_key_process_disp_name = "process_disp_name";
 function get_processes(req,res) {
     client.lrange(redis_id_processes, 0, -1, function (error, items) {
+        var retList = []
+        var filter = "/machines/" + req.param("machine_name") + "/"
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].indexOf(filter) == 0) {
+                retList.push(items[i])
+            }
+        }
         sendJson(res,items);
 
     })
@@ -143,7 +150,14 @@ var redis_key_button_on = "on";
 var redis_key_button_off = "off";
 function get_ifs(req,res) {
     client.lrange(list_of_if, 0, -1, function (error, items) {
-        sendJson(res,items);
+        var retList = []
+        var filter = "/machines/" + req.param("machine_name") + "/processes/"  + req.param("process_name") + "/"
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].indexOf(filter) == 0) {
+                retList.push(items[i])
+            }
+        }
+        sendJson(res,retList);
 
     })
 } 
@@ -165,6 +179,8 @@ function put_if(req,res) {
                     put_if_toggle(req,res)
                 } else if (req.param("if_kind") == "if_buttons") {
                     put_if_button(req,res)
+                } else if (req.param("if_kind") == "if_videos") {
+                    put_if_toggle(req,res)
                 } else {
                     res.writeHead("500")
                     res.write("kind is invalid")
@@ -287,6 +303,22 @@ function put_if_message_log(req,res) {
     res.writeHead(201);
     res.end();
 } 
+function put_if_videos(req,res) {
+    var if_video_disp_name = req.param("if_disp_name")
+    var if_kind = req.param("if_kind")
+    client.hmset(req.resource_id, 
+        redis_key_if_video_name, 
+        req.resource_id,
+        redis_key_if_numbers_disp_name, 
+        (isEmpty(if_video_disp_name) ? req.resource_id : if_video_disp_name),
+        redis_key_if_kind, 
+        if_kind
+    );
+    client.rpush(list_of_if,req.resource_id)
+    res.writeHead(201);
+    res.end();
+} 
+
 module.exports.put_if = put_if
 function get_if(req,res) {
 

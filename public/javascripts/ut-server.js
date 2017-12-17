@@ -112,6 +112,7 @@ function ut_server() {
         http_del("http://localhost:3000/raspin/internal/machines/machine_a/processes/proc_a/if_" + kind + "/" + kind + "if_2",
         function(e, xhr, settings){
         });
+        
 
     })
     noXX_hiding_disable_rule(num,"http://localhost:3000/raspin/internal/machines/machine_a/hiding_rules")

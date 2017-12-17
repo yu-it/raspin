@@ -1,0 +1,7 @@
+extends frame_of_if_common.pug
+block contents
+    div&attributes({"style":"text-align:right;vertical-align:bottom;display:table-cell;width:320px;height:240px;"})
+        span&attributes({"id":if_name+"/data","class":"num contents "})
+        span&attributes({"class":"num unit "}) #{unit} 
+    script(type='text/javascript').
+        add_observal("#{process_name}")

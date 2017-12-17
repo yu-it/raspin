@@ -1,35 +1,28 @@
-var params = {}
-var observe = []
-var disable_rules = {}
-var hiding_rules = {}
-function add_rule(id, rule_kind) {
-    $.get(resource_path(id) + "/" + rule_kind, 
-    function(rules) {
-        var rules = JSON.parse(rules)
-        if (rules != undefined && rules.length != 0) {
-            rules.forEach(function(rule) {
-                    if (!hiding_rules[rule]) {
-                        hiding_rules[rule] = []
-                    }
-                    hiding_rules[rule].push(id)
+function setup_process(process_name,disp_name) {
+    console.log("target_process:" + resource_path(process_name) + "/ifs")
+    $.get(resource_path(process_name) + "/ifs", function(ifs) {
+        var ifs = JSON.parse(ifs)
+        if (ifs == undefined || ifs.length == 0) {
+            //common_dialog("選択できるマシンがありません。",{"再読み込み":function(){ $( this ).dialog( "close" );select_machine();}})
+            return;
+        }
+        ifs.forEach(function(iface) {
+            console.log("url:" + resource_path(process_name) + "/ifs" + ", iface:" + iface)
+            $.get(resource_path(iface), function(if_data) {
+                //alert(if_data)
+                console.log(if_data)
+                if_data = JSON.parse(if_data)
+                $.get("/raspin/ui/" + if_data["if_kind"] + "?if_name=" + if_data["if_name"] + "&disp_name=" + if_data["if_disp_name"] + "&unit=" + if_data["unit"], 
+                function(html_doc) {
+                    var a = $("#" + escapeSelectorString(process_name)).append(html_doc)
                 })
-            }
-    })
+                    
+            })
     
+        })
+    })
 }
-function escapeSelectorString(val){
-    return val.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
-  }
-function resource_path(resource_name) {
-    return "/raspin/internal/" + resource_name
-}
-function hidden(name, val) {
-    if (val == undefined) {
-        return params[name]
-    } else {
-        params[name] = val
-    } 
-}
+
 function common_dialog(message,arg_buttons) {
     var dialog = $('<div id="dialog" title=""><p><span class="ui-icon ui-icon-circle-check" style="float:left; margin:0 7px 50px 0;"></span>' + message + '</p>')
     dialog.dialog({
@@ -95,6 +88,5 @@ function load_machine() {
 
 $(
 function () {
-    var machine = select_machine();
 }
 )

@@ -33,9 +33,31 @@ div.default.footer{
 .default {
   margin:0px;
 }
-p.caption.default {
-    color:#888888;
-    font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
-    font-size: 24pt;
+.default.box_title {
+  font-size:24pt;
+   
+ }
+ div.process_area {
+  background-color :#ffffff;
+  padding:1%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  justify-content: flex-start;   
+  border: medium solid #aaaaaa;
+  -webkit-flex-flow: row wrap;
+ }
+ p.caption.default {
+  color:#888888;
+  font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
+  font-size: 24pt;
+
+}
+ p.if_caption.default {
+  color:#888888;
+  font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
+  font-size: 16pt;
 
 }
