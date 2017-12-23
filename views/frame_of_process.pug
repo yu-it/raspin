@@ -1,5 +1,8 @@
-div.process_area&attributes({'id':process_name, 'disp_name':disp_name})
+div.box&attributes({'id':process_name, 'disp_name':disp_name})
     p.caption.default #{disp_name}
+    div.process_area&attributes({'id':process_name, 'disp_name':disp_name})
+        br
+        div&attributes({"id":process_name + "_container"})
 
 script(type='text/javascript').
     setup_process("#{process_name}","#{disp_name}")

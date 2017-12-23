@@ -59,8 +59,10 @@ function check_resource(req,res, target, exists, not_exists) {
     log("check:" + target)
     client.exists(target, function(err, reply) {
         if (reply === 1) {
+            log("n.e:" + target)
             exists(req,res)
         } else {
+            log("e.:" + target)
             not_exists(req,res);
         }
     });
@@ -240,11 +242,11 @@ function put_if_toggle(req,res) {
 } 
 function put_if_arrow(req,res) {
     var if_numbers_disp_name = req.param("if_disp_name")
-    var enable = isEmpty(req.param("enable")) ? "trdl" : req.param("enable")
+    var enable = isEmpty(req.param("enable")) ? "trbl" : req.param("enable")
     var if_kind = req.param("if_kind")
-    if (["trdl","lr","td"].indexOf(enable) < 0) {
+    if (["trbl","lr","tb"].indexOf(enable) < 0) {
         res.writeHead("500")
-        res.write("trdl,lr,td is required")
+        res.write("trbl,lr,tb is required")
         res.end()
         return
     }
@@ -467,7 +469,13 @@ function put_if_data(req,res) {
     //client.set("#" + req.resource_id + "/data/ack_id_seq",0, function() {
     //client.set("#" + req.resource_id + "/data/data_id_seq",0, function() {
     client.get(redis_id_data_listenercounter(req.resource_id), function(err, listener_count) {
-        put_if_data_business(req.resource_id, req.body["data"])
+        var data = req.param("data")
+        if (data == undefined) {
+            res.writeHead(500);
+            res.end();
+            return;    
+        }
+        put_if_data_business(req.resource_id, data)
         if (listener_count == 0 || listener_count == undefined || listener_count == null) {
             res.writeHead(200);
             res.end();
@@ -503,7 +511,9 @@ function put_if_data(req,res) {
 } 
 
 function put_if_data_business(resource_id,data) {
-    client.rpush(resource_id, data)
+    if (data != undefined) {
+        client.rpush(resource_id, data)
+    }
         
 } 
 

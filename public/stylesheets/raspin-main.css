@@ -37,6 +37,11 @@ div.default.footer{
   font-size:24pt;
    
  }
+ div.box {
+  background-color :#ffffff;
+  padding:1%;
+  /*border: medium solid #aaaaaa;*/
+ }
  div.process_area {
   background-color :#ffffff;
   padding:1%;
@@ -46,9 +51,27 @@ div.default.footer{
   display: -webkit-flex;
   display: flex;
   justify-content: flex-start;   
-  border: medium solid #aaaaaa;
   -webkit-flex-flow: row wrap;
- }
+}
+ div.if {
+  float: left;
+  margin:10px;
+  display:table-cell;
+}
+div.if_number {
+  background-color :#DDDDDD;
+  padding:1%;
+  height:80px;
+}
+div.if_arrow {
+  background-color :#DDDDDD;
+  padding:1%;
+}
+div.if_toggle {
+  background-color :#DDDDDD;
+  padding:1%;
+  height:80px;
+}
  p.caption.default {
   color:#888888;
   font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
@@ -59,5 +82,68 @@ div.default.footer{
   color:#888888;
   font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
   font-size: 16pt;
+
+}
+button.left{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_l.png");
+ }
+ 
+ button.right{
+  width:60px;
+  height:60px;
+  background-image: url("../images/allow_r.png");
+  background-size:60px 60px;
+ }
+ 
+ button.up{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_u.png");
+ }
+ 
+ button.down{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_d.png");
+ }
+ img.left{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_l.png");
+ }
+ 
+ img.right{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_r.png");
+ }
+ 
+ img.up{
+  width:60px;
+  height:60px;
+  background-size:60px 60px;
+  background-image: url("../images/allow_u.png");
+ }
+ 
+ img.down{
+  width:70px;
+  height:70px;
+  background-image: url("../images/allow_d.png");
+ }
+ .num.contents{
+  color: #888888;
+  font-size: 48pt;
+
+}
+.num.unit {
+  color: #888888;
+  font-size: 24pt;
 
 }

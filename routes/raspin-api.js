@@ -1,3 +1,7 @@
+//注意！pingでflush（テスト用）
+var client = require('redis').createClient();
+
+
 var express = require('express');
 var logics = require('../private-logics/raspin-api.logic');
 var router = express.Router();
@@ -44,6 +48,9 @@ function check_resource(req,res,next) {
 }
 function req_log(req) {
   log("method:" + req.method + " " + req.originalUrl + "(" + req.path + ")#" + req.resource_id)
+  for (k in req.body) {
+    req.params[k.replace("[]","")] = req.body[k];
+  };
 }
 function log(str) {
   console.log(str)
@@ -59,6 +66,7 @@ function return_404(req,res) {
 }
 router.get(url_ping, function(req, res, next) {
   req_log(req)
+  client.flushall()
   res.writeHead(200);
   res.end();
 });
@@ -126,15 +134,21 @@ router.get(url_ifs_all, function(req, res, next) {
 //if
 router.put(url_if, function(req, res, next) {
   req_log(req)
-  for (k in req.body) {
-    req.params[k.replace("[]","")] = req.body[k];
-  };
   logics.check_resource(req,
     res,
     req.resource_id,
     return_200,
     logics.put_if);
 });
+router.put(url_if_data, function(req, res, next) {
+  req_log(req)
+  logics.check_resource(req,
+    res,
+    req.resource_id.replace("/data",""),
+    logics.put_if_data,
+    return_404);
+    
+  })
 router.get(url_if, function(req, res, next) {
   req_log(req)
     logics.get_if(req,res)
@@ -185,10 +199,8 @@ router.get(url_if_data, function(req, res, next) {
   req_log(req)
     logics.get_if_data(req,res)
   })
-router.put(url_if_data, function(req, res, next) {
-  req_log(req)
-    logics.put_if_data(req,res)
-  })
+  //req_log(req)
+  //logics.put_if_data(req,res)
   
 router.get(url_if_data_signal, function(req, res, next) {
   req_log(req)

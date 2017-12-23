@@ -1,22 +1,3 @@
-var params = {}
-var observe = []
-var disable_rules = {}
-var hiding_rules = {}
-function add_rule(id, rule_kind) {
-    $.get(resource_path(id) + "/" + rule_kind, 
-    function(rules) {
-        var rules = JSON.parse(rules)
-        if (rules != undefined && rules.length != 0) {
-            rules.forEach(function(rule) {
-                    if (!hiding_rules[rule]) {
-                        hiding_rules[rule] = []
-                    }
-                    hiding_rules[rule].push(id)
-                })
-            }
-    })
-    
-}
 function escapeSelectorString(val){
     return val.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
   }
@@ -66,7 +47,11 @@ function select_machine() {
         machines = JSON.parse(machines)
         if (machines == undefined || machines.length == 0) {
             common_dialog("選択できるマシンがありません。",{"再読み込み":function(){ $( this ).dialog( "close" );select_machine();}})
-            
+
+        } else if (machines == undefined || machines.length == 1) {
+            hidden("machine",machines[0]);
+            load_machine();
+
         } else {
             common_selector("aaa",machines,{"決定":function(){ $( this ).dialog( "close" );hidden("machine",hidden("sel_val"));load_machine();}})
         }
@@ -81,10 +66,11 @@ function load_machine() {
             return;
         }
         processes.forEach(function(process) {
+            $("#main").append('<div class="' + resource_path(process) + '"/>')
             $.get(resource_path(process), function(process_data) {
                 process_data = JSON.parse(process_data)
                 $.get("/raspin/ui/process/?process_name=" + process_data["process_name"] + "&disp_name=" + process_data["process_disp_name"], function(html_doc) {
-                    $("#main").append(html_doc)
+                    $(id2JQCls(resource_path(process))).replaceWith(html_doc)
                 })
                     
             })
@@ -92,6 +78,7 @@ function load_machine() {
         })
     })
 }
+
 
 $(
 function () {

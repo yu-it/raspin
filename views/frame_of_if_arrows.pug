@@ -1,0 +1,33 @@
+extends frame_of_if_common.pug
+block contents
+    div.if_arrow&attributes({"style":"text-align:right;vertical-align:bottom;"})
+        - var l_idx = enable.indexOf('l') >= 0 ? 1 : 0
+        - var r_idx = enable.indexOf('r') >= 0 ? 1 : 0
+        - var t_idx = enable.indexOf('t') >= 0 ? 1 : 0
+        - var b_idx = enable.indexOf('b') >= 0 ? 1 : 0
+        table
+            tr
+                td
+                td
+                    if t_idx
+                        button.control.up.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "t")', onmouseup='button_up_arrow_handler("'+if_name+'", "t")') 
+                    else
+                        img.control.up.direction(src="../images/allow_u_disable.png")
+                td
+            tr
+                td
+                    if l_idx
+                        button.control.left.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "l")', onmouseup='button_up_arrow_handler("'+if_name+'", "l")') 
+                    else
+                        img.control.left.direction(src="../images/allow_l_disable.png")
+                td
+                    if b_idx
+                        button.control.down.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "b")', onmouseup='button_up_arrow_handler("'+if_name+'", "b")') 
+                    else
+                        img.control.down.direction(src="../images/allow_d_disable.png")
+                td
+                    if r_idx
+                        button.control.right.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "r")', onmouseup='button_up_arrow_handler("'+if_name+'", "r")') 
+                    else
+                        img.control.right.direction(src="../images/allow_r_disable.png")
+    script(type='text/javascript').

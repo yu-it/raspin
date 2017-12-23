@@ -1,0 +1,6 @@
+extends frame_of_if_common.pug
+block contents
+    div.if_toggles&attributes({"style":"text-align:right;vertical-align:bottom;"})
+        button(onclick='toggle_handler("' + if_name + '");')&attributes({"id":if_name+"/data","class":"num contents ",}) #{default_val}
+    script(type='text/javascript').
+        //add_observal("#{process_name}")

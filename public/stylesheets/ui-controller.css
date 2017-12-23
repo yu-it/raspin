@@ -6,26 +6,6 @@ button.direction{
  height:70px;
 }
 
-button.left{
- position:relative; top:70px; left:0px;
- 
- background-image: url("../images/allow_l.png");
-}
-
-button.right{
- position:relative; top:70px; left:70px;
- background-image: url("../images/allow_r.png");
-}
-
-button.up{
- position:relative; top:-70px; left:70px;
- background-image: url("../images/allow_u.png");
-}
-
-button.down{
- position:relative; top:0px; left:0px;
- background-image: url("../images/allow_d.png");
-}
 button.inp{
  background-color: #00FF00;
 }
@@ -58,32 +38,3 @@ div.pv_base{
 }
 
 
-
-
-img.left{
- position:relative; top:70px; left:0px;
- width:70px;
- height:70px;
- background-image: url("../images/allow_l.png");
-}
-
-img.right{
- position:relative; top:70px; left:70px;
- width:70px;
- height:70px;
- background-image: url("../images/allow_r.png");
-}
-
-img.up{
- position:relative; top:-70px; left:70px;
- width:70px;
- height:70px;
- background-image: url("../images/allow_u.png");
-}
-
-img.down{
- position:relative; top:0px; left:0px;
- width:70px;
- height:70px;
- background-image: url("../images/allow_d.png");
-}
