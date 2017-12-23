@@ -12,20 +12,20 @@ function setup_process(process_name,disp_name) {
                 console.log(if_data)
                 if_data = JSON.parse(if_data)
                 var path_common = "/raspin/ui/" + if_data["if_kind"] + "?if_name=" + if_data["if_name"] + "&disp_name=" + if_data["if_disp_name"]
-                var url = ""
+                var url = path_common
                 if (if_data["if_kind"] == "if_numbers") {
-                    url = path_common + "&unit=" + if_data["unit"]
+                    url += "&unit=" + if_data["unit"]
     
                 } else if (if_data["if_kind"] == "if_arrows") {
-                    url = path_common + "&enable=" + if_data["enable"]
+                    url += "&enable=" + if_data["enable"]
                         
                 } else if (if_data["if_kind"] == "if_buttons") {
-                    url = path_common + "&on=" + if_data["on"] + "&off=" + if_data["off"]
+                    url += "&on=" + if_data["on"] + "&off=" + if_data["off"]
                         
                 } else if (if_data["if_kind"] == "if_toggles") {
                     var default_val = if_data["status"][0]
-                    url = path_common + "&default_val=" + default_val
-                }
+                    url += "&default_val=" + default_val
+                } 
                 $.get(url, 
                 function(html_doc) {
                     var a = $(id2JQCls(resource_path(iface))).replaceWith(html_doc)

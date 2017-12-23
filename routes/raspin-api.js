@@ -47,10 +47,12 @@ function check_resource(req,res,next) {
     return_404)
 }
 function req_log(req) {
-  log("method:" + req.method + " " + req.originalUrl + "(" + req.path + ")#" + req.resource_id)
+  var logstr = "method:" + req.method + " " + req.originalUrl + "(" + req.path + ")#" + req.resource_id
   for (k in req.body) {
+    logstr += "," + k + "=" + req.body[k];
     req.params[k.replace("[]","")] = req.body[k];
   };
+  log(logstr)
 }
 function log(str) {
   console.log(str)

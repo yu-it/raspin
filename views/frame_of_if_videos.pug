@@ -1,0 +1,4 @@
+extends frame_of_if_common.pug
+block contents
+    img&attributes({"class":"video contents "  + layout_class})(src="http://" + host + ":8080/?action=stream")
+    script(type='text/javascript').

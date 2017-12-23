@@ -182,7 +182,7 @@ function put_if(req,res) {
                 } else if (req.param("if_kind") == "if_buttons") {
                     put_if_button(req,res)
                 } else if (req.param("if_kind") == "if_videos") {
-                    put_if_toggle(req,res)
+                    put_if_videos(req,res)
                 } else {
                     res.writeHead("500")
                     res.write("kind is invalid")
@@ -305,14 +305,17 @@ function put_if_message_log(req,res) {
     res.writeHead(201);
     res.end();
 } 
+var redis_key_if_videos_name = "if_name"
+var redis_key_if_videos_disp_name = "if_disp_name";
+
 function put_if_videos(req,res) {
-    var if_video_disp_name = req.param("if_disp_name")
+    var if_videos_disp_name = req.param("if_disp_name")
     var if_kind = req.param("if_kind")
     client.hmset(req.resource_id, 
-        redis_key_if_video_name, 
+        redis_key_if_videos_name, 
         req.resource_id,
-        redis_key_if_numbers_disp_name, 
-        (isEmpty(if_video_disp_name) ? req.resource_id : if_video_disp_name),
+        redis_key_if_videos_disp_name, 
+        (isEmpty(if_videos_disp_name) ? req.resource_id : if_videos_disp_name),
         redis_key_if_kind, 
         if_kind
     );

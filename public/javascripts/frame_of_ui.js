@@ -2,7 +2,7 @@ function escapeSelectorString(val){
     return val.replace(/[ !"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, "\\$&");
   }
 function resource_path(resource_name) {
-    return "/raspin/internal/" + resource_name
+    return ("/raspin/internal/" + resource_name).replace("//", "/")
 }
 function hidden(name, val) {
     if (val == undefined) {

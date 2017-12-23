@@ -14,7 +14,7 @@ function id2JQCls(id) {
     return "." + escapeSelectorString(id)
 }
 function add_rule(id, rule_kind) {
-    $.get(resource_path(id) + rule_kind, 
+    $.get((resource_path(id) + "/" + rule_kind).replace("//","/"), 
     function(rules) {
         var rules = JSON.parse(rules)
         if (rules != undefined && rules.length != 0) {
@@ -42,7 +42,7 @@ function toggle_handler(id) {
     aplly_rules()
     $.ajax(
         {
-            url:resource_path(id) + "data",
+            url:resource_path(id + "/data"),
             method:"PUT",
             data:{"data":next},
             async:false
@@ -57,7 +57,7 @@ function button_down_handler(id) {
     aplly_rules()
     $.ajax(
         {
-            url:resource_path(id) + "data",
+            url:resource_path(id + "/data"),
             method:"PUT",
             data:{"data":"on"},
             async:false
@@ -71,7 +71,7 @@ function button_up_handler(id) {
     aplly_rules()
     $.ajax(
         {
-            url:resource_path(id) + "data",
+            url:resource_path(id + "/data"),
             method:"PUT",
             data:{"data":"off"},
             async:false
@@ -83,7 +83,7 @@ function button_down_arrow_handler(id,dir) {
     aplly_rules()
     $.ajax(
         {
-            url:resource_path(id) + "data",
+            url:resource_path(id + "/data"),
             method:"PUT",
             data:{"data":dir},
             async:false
@@ -95,7 +95,7 @@ function button_up_arrow_handler(id,dir) {
     aplly_rules()
     $.ajax(
         {
-            url:resource_path(id) + "data",
+            url:resource_path(id + "/data"),
             method:"PUT",
             data:{"data":""},
             async:false
@@ -146,4 +146,4 @@ function observe_periodically() {
 }
 
 
-// setInterval(observe_periodically, 1000)
+setInterval(observe_periodically, 3000)

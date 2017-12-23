@@ -28,7 +28,7 @@ router.get('/if_buttons', function(req, res, next) {
   res.render('frame_of_if_buttons',{"if_name":req.param("if_name"),"disp_name":req.param("disp_name")});
 });
 router.get('/if_videos', function(req, res, next) {
-  res.render('frame_of_if_videos',{"if_name":req.param("if_name"),"disp_name":req.param("disp_name")});
+  res.render('frame_of_if_videos',{"if_name":req.param("if_name"),"disp_name":req.param("disp_name"),"host":req.headers["host"].replace(/:\d+/g,"")});
 });
 
 
