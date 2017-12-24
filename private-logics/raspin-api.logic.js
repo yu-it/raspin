@@ -112,6 +112,14 @@ function get_processes(req,res) {
 } 
 module.exports.get_processes = get_processes
 
+function emit_ui_event(req) {
+    ev.emit("ui_receive_ch",
+    JSON.stringify({
+    "id": "/machines/" + req.param("machine_name") + "/signal",
+    "target":req.resource_id,
+    "event_type":req.method}))
+
+}
 //process
 function put_process(req,res) {
     var process_disp_name = req.param("process_disp_name")
@@ -121,6 +129,7 @@ function put_process(req,res) {
         redis_key_process_disp_name, 
         (isEmpty(process_disp_name) ? req.resource_id : process_disp_name));
     client.rpush(redis_id_processes,req.resource_id)
+    emit_ui_event(req)
     res.writeHead(201);
     res.end();
 } 
@@ -132,6 +141,7 @@ function get_process(req,res) {
 } 
 module.exports.get_process = get_process
 function del_process(req,res) {
+    emit_ui_event(req)
     client.del(req.resource_id, function (error, items) {
         client.lrem(redis_id_processes, 1, req.resource_id)
         res.writeHead(200);
@@ -188,6 +198,7 @@ function put_if(req,res) {
                     res.write("kind is invalid")
                     res.end()
                 }
+                emit_ui_event(req)
             })   
         })
     })
@@ -342,6 +353,7 @@ function get_if(req,res) {
 } 
 module.exports.get_if = get_if
 function del_if(req,res) {
+    emit_ui_event(req)
     client.del(req.resource_id, function (error, items) {
         client.lrem(list_of_if, 1, req.resource_id)
         client.del(redis_id_data_listenercounter(req.resource_id + "/data"), function() {
@@ -417,6 +429,7 @@ var reply_waiting_requests = {}
 var signal_waiting_requests = {}
 ev.on("reply_ch", accept_reply)
 ev.on("receive_ch", accept_signal)
+ev.on("ui_receive_ch", accept_ui_signal)
 function sse_response_initialize(res) {
     // 55秒のタイムアウト対策
     res.writeHead(200, {
@@ -446,6 +459,25 @@ function put_reply(req,res) {
     req.resource_id)
     res.writeHead(200)
     res.end()
+}
+var ui_signal_waiting_requests = {}
+module.exports.get_ui_signal_stream = get_ui_signal_stream
+function get_ui_signal_stream(req,res) {
+    if(!ui_signal_waiting_requests[req.resource_id]) {
+        ui_signal_waiting_requests[req.resource_id] = []
+    }
+    sse_response_initialize(res);
+    ui_signal_waiting_requests[req.resource_id].push(res);
+    res.on("close",function() {
+        if (signal_waiting_requests[req.resource_id] == undefined) {
+            return
+        }
+        for (var i = 0;i < signal_waiting_requests[req.resource_id].length; i++) {
+            if (signal_waiting_requests[req.resource_id][i] == res) {
+                signal_waiting_requests[req.resource_id].splice(i,1)
+            }
+        }
+    })
 }
 module.exports.get_signal_stream = get_signal_stream
 function get_signal_stream(req,res) {
@@ -524,6 +556,20 @@ function accept_signal(data) {
     log("accept_signal")
     var id = JSON.parse(data)["destination"]
     var signal_receiver_inf = signal_waiting_requests[id];
+    if (signal_receiver_inf == undefined) {
+        return
+    }
+    signal_receiver_inf.forEach(function(receiver) {
+        receiver.write("event: signal\n\n")
+        receiver.write("data: "+data + "\n\n") //この2行の改行が重要。
+        receiver.flush() 
+        })
+}
+function accept_ui_signal(data) {
+    log("accept_signal")
+    
+    var id = JSON.parse(data)["id"]
+    var signal_receiver_inf = ui_signal_waiting_requests[id];
     if (signal_receiver_inf == undefined) {
         return
     }

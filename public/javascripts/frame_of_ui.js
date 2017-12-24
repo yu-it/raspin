@@ -59,6 +59,7 @@ function select_machine() {
 }
 function load_machine() {
     hidden("machine_base", "/raspin/internal" + hidden("machine"))
+    init_ui_sse_receiver()
     $.get(hidden("machine_base") + "/processes", function(processes) {
         processes = JSON.parse(processes)
         if (processes == undefined || processes.length == 0) {
@@ -66,19 +67,24 @@ function load_machine() {
             return;
         }
         processes.forEach(function(process) {
-            $("#main").append('<div class="' + resource_path(process) + '"/>')
-            $.get(resource_path(process), function(process_data) {
-                process_data = JSON.parse(process_data)
-                $.get("/raspin/ui/process/?process_name=" + process_data["process_name"] + "&disp_name=" + process_data["process_disp_name"], function(html_doc) {
-                    $(id2JQCls(resource_path(process))).replaceWith(html_doc)
-                })
-                    
-            })
-    
+            append_process(process)    
         })
     })
 }
+function delete_process(process) {
+    $(id2JQId(process)).remove()
+}
+function append_process(process) {
+    $("#main").append('<div class="' + process + '" style="background-color:#CCCCC;"/>')
+    $.get(resource_path(process), function(process_data) {
+        process_data = JSON.parse(process_data)
+        $.get("/raspin/ui/process/?process_name=" + process_data["process_name"] + "&disp_name=" + process_data["process_disp_name"], function(html_doc) {
+            $(id2JQCls(process)).replaceWith(html_doc)
+        })
+            
+    })
 
+}
 
 $(
 function () {

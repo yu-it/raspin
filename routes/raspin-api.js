@@ -34,6 +34,7 @@ var url__if_disable_rules_get_alias =          "/machines/:machine_name/processe
 var url_if_hiding_rules_get_alias =            "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/hiding_rules"
 var url_if_data =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data"
 var url_if_data_signal =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data/signal"
+var url_ui_signal =                         "/machines/:machine_name/signal"
 var url_if_data_reply =                         "/machines/:machine_name/processes/:process_name/:if_kind(if_numbers|if_messages|if_logs|if_arrows|if_toggles|if_buttons|if_videos)/:if_name/data/reply/:ack_id"
 
 
@@ -68,7 +69,6 @@ function return_404(req,res) {
 }
 router.get(url_ping, function(req, res, next) {
   req_log(req)
-  client.flushall()
   res.writeHead(200);
   res.end();
 });
@@ -207,6 +207,10 @@ router.get(url_if_data, function(req, res, next) {
 router.get(url_if_data_signal, function(req, res, next) {
   req_log(req)
     logics.get_signal_stream(req,res)
+  })
+router.get(url_ui_signal, function(req, res, next) {
+  req_log(req)
+    logics.get_ui_signal_stream(req,res)
   })
 router.put(url_if_data_reply, function(req, res, next) {
 req_log(req)

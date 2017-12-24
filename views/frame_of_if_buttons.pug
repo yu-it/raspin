@@ -1,0 +1,6 @@
+extends frame_of_if_common.pug
+block contents
+    div.if_toggles&attributes({"style":"text-align:right;vertical-align:bottom;"})
+        button(onmousedown='button_down_handler("'+if_name+'", "t")', onmouseup='button_up_handler("'+if_name+'", "t")') #{on}
+    script(type='text/javascript').
+        //add_observal("#{process_name}")

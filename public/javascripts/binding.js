@@ -1,3 +1,13 @@
+function init_ui_sse_receiver() {
+    var es = new EventSource('/raspin/internal' + hidden("machine") + "/signal");
+    
+    es.onmessage = function(event) {
+        ui_event_queue.push(event)
+        process_ui_event()      //リアルタイム性を向上させるにはこちら、リソース抑えるならsetintervalのイベント
+    };
+    
+}
+var ui_event_queue = []
 var params = {}
 var observe = []
 var disable_rules = {}
@@ -143,7 +153,41 @@ function observe_periodically() {
             $(id2JQId(id + "/data")).text(data[0])
         })
     })
+    process_ui_event()
 }
-
+function process_ui_event() {
+    while (ui_event_queue.length > 0) {
+        console.log("ui:" + ui_event_queue[ui_event_queue.length - 1])
+        var event = JSON.parse(ui_event_queue.shift()["data"])
+        var target = event["target"]
+        if (target.split("/").length == 5) {
+            //process event
+            if (event["event_type"] == "PUT") {
+                append_process(target)
+            }
+            if (event["event_type"] == "DELETE") {
+                delete_process(target)
+                
+            }
+        }
+        if (target.split("/").length == 7) {
+            var ary = target.split("/")
+            var process = ""
+            for (var i = 1; i < 5; i++) {
+                process += "/" + ary[i]
+            }
+        
+            if (event["event_type"] == "PUT") {
+                append_if(process, target)
+                
+            }
+            if (event["event_type"] == "DELETE") {
+                delete_if(target)
+                
+            }
+        }
+    }
+    
+}
 
 setInterval(observe_periodically, 3000)
