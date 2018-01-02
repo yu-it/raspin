@@ -24,6 +24,9 @@ function sse_send(ary, res) {
   res.write(padding + "\r\n")
   res.write("0\n")
   res.write("\r\n\r\n")
+  res.write("0\n")
+  res.write("\r\n\r\n")
+  res.write("\r\n\r\n")
   res.flush()
 }
 function sse_response_initialize(res) {
