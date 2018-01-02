@@ -430,6 +430,15 @@ var signal_waiting_requests = {}
 ev.on("reply_ch", accept_reply)
 ev.on("receive_ch", accept_signal)
 ev.on("ui_receive_ch", accept_ui_signal)
+function sse_send(ary, res) {
+    ary.forEach(function(f) {
+        res.write(f.length.toString(16) + "\n")
+        res.write(f + "\r\n")
+    })
+    res.write("0\n")
+    res.write("\r\n\r\n")
+    res.flush()
+}
 function sse_response_initialize(res) {
     // 55秒のタイムアウト対策
     res.writeHead(200, {
@@ -447,12 +456,11 @@ function sse_response_initialize(res) {
         
     }
     var timer = setTimeout(timeout_func, 50000);
-
+  
     // 最初の30秒のタイムアウト対策
     res.write(':\n\n');  
-    res.flush();  
 }
-
+  
 module.exports.put_reply = put_reply
 function put_reply(req,res) {
     ev.emit("reply_ch",
@@ -551,15 +559,6 @@ function put_if_data_business(resource_id,data) {
     }
         
 } 
-function sse_send(ary, res) {
-    ary.forEach(function(f) {
-        res.write(f.length.toString(16) + "\n")
-        res.write(f + "\n")
-    })
-    res.write("0\n")
-    res.write("\n\n")
-    res.flush()
-}
 function accept_signal(data) {
     log("accept_signal")
     var id = JSON.parse(data)["destination"]

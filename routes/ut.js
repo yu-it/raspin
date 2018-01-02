@@ -11,6 +11,14 @@ router.get('/', function(req, res, next) {
   
 });
 var resps=[]
+function sse_send(ary, res) {
+  ary.forEach(function(f) {
+      res.write(f.length.toString(16) + "\n")
+      res.write(f + "\r\n")
+  })
+  res.write("0\n")
+  res.write("\r\n\r\n")
+  res.flush()
 function sse_response_initialize(res) {
   // 55秒のタイムアウト対策
   res.writeHead(200, {
@@ -22,37 +30,6 @@ function sse_response_initialize(res) {
   var timeout_func = function() {
       if (!res._headerSent) {
           res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
-          res.write(':\n\n');  
           res.flush() 
           setTimeout(timeout_func, 5000)
       }
@@ -62,39 +39,6 @@ function sse_response_initialize(res) {
 
   // 最初の30秒のタイムアウト対策
   res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-  res.write(':\n\n');  
-res.flush()     
   resps.push(res)
 }
 
@@ -105,36 +49,12 @@ router.get('/sse/emitter', function(req, res, next) {
 router.get('/sse/receive', function(req, res, next) {
   sse_response_initialize(res)
 });
+}
 
 
 ev.on("data", function(dat) {
   resps.forEach(function(res){
-    res.write("event: ev\n")
-    res.write("data: " + dat)
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n")
-    res.write("dum: ev\n\n")
-    res.flush()
+    sse_send(["event: ev","data: " + dat], res)
   })
 })
 ev.on("data2", function(dat) {
