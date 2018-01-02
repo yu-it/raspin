@@ -10,15 +10,45 @@ router.get('/', function(req, res, next) {
     });
   
 });
+var resps=[]
+function sse_response_initialize(res) {
+  // 55秒のタイムアウト対策
+  res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no' // disable nginx proxy buffering
+  })
+  var timeout_func = function() {
+      if (!res._headerSent) {
+          res.write(':\n\n');  
+          res.flush() 
+          setTimeout(timeout_func, 5000)
+      }
+      
+  }
+  var timer = setTimeout(timeout_func, 50000);
+
+  // 最初の30秒のタイムアウト対策
+  res.write(':\n\n');  
+  res.flush()     
+  resps.push(res)
+}
 
 router.get('/sse/emitter', function(req, res, next) {
-  ev.emit(req.param("ev"),req.param("data"))  
+  ev.emit("data",req.param("data"))  
   res.send("accepted")
+});
+router.get('/sse/receive', function(req, res, next) {
+  sse_response_initialize(res)
 });
 
 
 ev.on("data", function(dat) {
-  console.log(dat)
+  resps.forEach(function(res){
+    res.write("event: ev\n\n")
+    res.write("data: d")
+  })
 })
 ev.on("data2", function(dat) {
   console.log("data2:" + dat)
