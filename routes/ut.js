@@ -48,6 +48,7 @@ ev.on("data", function(dat) {
   resps.forEach(function(res){
     res.write("event: ev\n")
     res.write("data: d\n\n\n\n\n\n\n\n\n")
+    res.flush()
   })
 })
 ev.on("data2", function(dat) {
