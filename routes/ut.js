@@ -47,7 +47,9 @@ router.get('/sse/receive', function(req, res, next) {
 ev.on("data", function(dat) {
   resps.forEach(function(res){
     res.write("event: ev\n")
-    res.write("data: d\n")
+    res.write("data: " + dat)
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
     res.write("dum: ev\n")
     res.write("dum: ev\n")
     res.write("dum: ev\n")
