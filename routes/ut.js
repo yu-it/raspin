@@ -22,6 +22,37 @@ function sse_response_initialize(res) {
   var timeout_func = function() {
       if (!res._headerSent) {
           res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
+          res.write(':\n\n');  
           res.flush() 
           setTimeout(timeout_func, 5000)
       }
@@ -31,7 +62,39 @@ function sse_response_initialize(res) {
 
   // 最初の30秒のタイムアウト対策
   res.write(':\n\n');  
-  res.flush()     
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+  res.write(':\n\n');  
+res.flush()     
   resps.push(res)
 }
 
@@ -48,6 +111,12 @@ ev.on("data", function(dat) {
   resps.forEach(function(res){
     res.write("event: ev\n")
     res.write("data: " + dat)
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
+    res.write("dum: ev\n")
     res.write("dum: ev\n")
     res.write("dum: ev\n")
     res.write("dum: ev\n")
