@@ -450,7 +450,6 @@ function sse_response_initialize(res) {
 
     // 最初の30秒のタイムアウト対策
     res.write(':\n\n');  
-    res.flush()     
 }
 
 module.exports.put_reply = put_reply
@@ -553,11 +552,11 @@ function put_if_data_business(resource_id,data) {
 } 
 function sse_send(ary, res) {
     ary.forEach(function(f) {
-        res.send(f.length.toString(16) + "\n")
-        res.send(f + "\n")
+        res.write(f.length.toString(16) + "\n")
+        res.write(f + "\n")
     })
-    res.send("0\n")
-    res.send("\n\n")
+    res.write("0\n")
+    res.write("\n\n")
     res.flush()
 }
 function accept_signal(data) {
@@ -568,11 +567,14 @@ function accept_signal(data) {
         return
     }
     signal_receiver_inf.forEach(function(receiver) {
+        // receiver.write("event: signal\n")
+        // receiver.write("data: "+data + "\n\n") //この2行の改行が重要。
         sse_send(
             ["event: signal",
             "data: "+data]
             ,receiver)
-        })
+        
+    })
 }
 function accept_ui_signal(data) {
     log("accept_signal")
