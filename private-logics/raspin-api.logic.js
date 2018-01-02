@@ -560,8 +560,8 @@ function accept_signal(data) {
         return
     }
     signal_receiver_inf.forEach(function(receiver) {
-        receiver.write("event: signal\n\n")
-        receiver.write("data: "+data + "\n\n") //この2行の改行が重要。
+        receiver.write("event: signal\n")
+        receiver.write("data: "+data + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") //この2行の改行が重要。
         receiver.flush() 
         })
 }
@@ -575,7 +575,7 @@ function accept_ui_signal(data) {
     }
     signal_receiver_inf.forEach(function(receiver) {
         receiver.write("event: signal\n\n")
-        receiver.write("data: "+data + "\n\n") //この2行の改行が重要。
+        receiver.write("data: "+data + "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n") //この2行の改行が重要。
         receiver.flush() 
         })
 }
