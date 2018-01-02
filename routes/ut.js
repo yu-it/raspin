@@ -13,9 +13,15 @@ router.get('/', function(req, res, next) {
 var resps=[]
 function sse_send(ary, res) {
   ary.forEach(function(f) {
-      res.write(f.length.toString(16) + "\n")
+      res.write(f.length.toString(16) + "\r\n")
       res.write(f + "\r\n")
   })
+  var padding = "a: "
+  for (var i = 0; i < 256; i++) {
+    padding += "x"
+  }
+  res.write(padding.length.toString(16) + "\r\n")
+  res.write(padding + "\r\n")
   res.write("0\n")
   res.write("\r\n\r\n")
   res.flush()
