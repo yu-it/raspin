@@ -17,7 +17,7 @@ function sse_send(ary, res) {
       res.write(f + "\r\n")
   })
   var padding = "a: "
-  for (var i = 0; i < 256; i++) {
+  for (var i = 0; i < 1024; i++) {
     padding += "x"
   }
   res.write(padding.length.toString(16) + "\r\n")
