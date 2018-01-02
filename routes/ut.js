@@ -19,6 +19,7 @@ function sse_send(ary, res) {
   res.write("0\n")
   res.write("\r\n\r\n")
   res.flush()
+}
 function sse_response_initialize(res) {
   // 55秒のタイムアウト対策
   res.writeHead(200, {
@@ -49,7 +50,6 @@ router.get('/sse/emitter', function(req, res, next) {
 router.get('/sse/receive', function(req, res, next) {
   sse_response_initialize(res)
 });
-}
 
 
 ev.on("data", function(dat) {
