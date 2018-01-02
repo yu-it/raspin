@@ -450,6 +450,7 @@ function sse_response_initialize(res) {
 
     // 最初の30秒のタイムアウト対策
     res.write(':\n\n');  
+    res.flush();  
 }
 
 module.exports.put_reply = put_reply
