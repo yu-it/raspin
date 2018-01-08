@@ -1,10 +1,9 @@
 function init_ui_sse_receiver() {
     var es = new EventSource('/raspin/internal' + hidden("machine") + "/signal");
-    
-    es.onmessage = function(event) {
+    es.addEventListener('signal', function (event) {
         ui_event_queue.push(event)
         process_ui_event()      //リアルタイム性を向上させるにはこちら、リソース抑えるならsetintervalのイベント
-    };
+    });    
     
 }
 var ui_event_queue = []
@@ -150,7 +149,17 @@ function observe_periodically() {
         $.get(resource_path(id) + "/data", function(data) {
             console.log(data)
             data = JSON.parse(data)
-            $(id2JQId(id + "/data")).text(data[0])
+            if ($(id2JQId(id + "/data")).attr("scale") != undefined) {
+                console.log("round")
+                var rate = 10
+                for (var i = 0; i < $(id2JQId(id + "/data")).attr("scale"); i++) {
+                    rate *= 10
+                }
+                $(id2JQId(id + "/data")).text(Math.round(data[0] * rate) / rate)
+
+            } else {
+                $(id2JQId(id + "/data")).text(data[0])
+            }
         })
     })
     process_ui_event()
