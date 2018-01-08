@@ -151,11 +151,11 @@ function observe_periodically() {
             data = JSON.parse(data)
             if ($(id2JQId(id + "/data")).attr("scale") != undefined) {
                 console.log("round")
-                var rate = 10
-                for (var i = 0; i < $(id2JQId(id + "/data")).attr("scale"); i++) {
-                    rate *= 10
-                }
-                $(id2JQId(id + "/data")).text(Math.round(data[0] * rate) / rate)
+                // var rate = 10
+                // for (var i = 0; i < $(id2JQId(id + "/data")).attr("scale"); i++) {
+                //     rate *= 10
+                // }
+                $(id2JQId(id + "/data")).text(Math.round(data[0] * 100) / 100)
 
             } else {
                 $(id2JQId(id + "/data")).text(data[0])
