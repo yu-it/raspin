@@ -11,6 +11,13 @@ div.header{
     font-family: Helvetica , "游ゴシック" , "Yu Gothic" , sans-serif;
   
   }
+button {
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer */
+  -khtml-user-select: none; /* KHTML browsers (e.g. Konqueror) */
+  -webkit-user-select: none; /* Chrome, Safari, and Opera */
+  -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
+}
 div.default.entire{
     background-color :#DDDDDD;
     margin:2% 0% 2% 0%;

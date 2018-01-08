@@ -10,24 +10,76 @@ block contents
                 td
                 td
                     if t_idx
-                        button.control.up.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "t")', onmouseup='button_up_arrow_handler("'+if_name+'", "t")') 
+                        button.control.up.direction
                     else
                         img.control.up.direction(src="../images/allow_u_disable.png")
                 td
             tr
                 td
                     if l_idx
-                        button.control.left.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "l")', onmouseup='button_up_arrow_handler("'+if_name+'", "l")') 
+                        button.control.left.direction
                     else
                         img.control.left.direction(src="../images/allow_l_disable.png")
                 td
                     if b_idx
-                        button.control.down.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "b")', onmouseup='button_up_arrow_handler("'+if_name+'", "b")') 
+                        button.control.down.direction
                     else
                         img.control.down.direction(src="../images/allow_d_disable.png")
                 td
                     if r_idx
-                        button.control.right.direction(onmousedown='button_down_arrow_handler("'+if_name+'", "r")', onmouseup='button_up_arrow_handler("'+if_name+'", "r")') 
+                        button.control.right.direction
                     else
                         img.control.right.direction(src="../images/allow_r_disable.png")
     script(type='text/javascript').
+        var id = id2JQId("#{if_name}");
+        var direction_symbols = {
+            " .up":
+                [function() {button_down_arrow_handler("#{if_name}", "t")}, 
+                function() {button_up_arrow_handler("#{if_name}", "t")}],
+            " .down":
+                [function() {button_down_arrow_handler("#{if_name}", "b")}, 
+                function() {button_up_arrow_handler("#{if_name}", "b")}], 
+            " .left":
+                [function() {button_down_arrow_handler("#{if_name}", "l")}, 
+                function() {button_up_arrow_handler("#{if_name}", "l")}], 
+            " .right":
+                [function() {button_down_arrow_handler("#{if_name}", "r")}, 
+                function() {button_up_arrow_handler("#{if_name}", "r")}]
+            }
+            
+        
+        $(id +  " .up")[0].addEventListener("mousedown", direction_symbols[" .up"][0])
+        $(id +  " .up")[0].addEventListener("touchstart", direction_symbols[" .up"][0])
+        $(id +  " .up")[0].addEventListener("mouseup", direction_symbols[" .up"][1])
+        $(id +  " .up")[0].addEventListener("touchend", direction_symbols[" .up"][1])
+        $(id +  " .up")[0].addEventListener("dragleave", direction_symbols[" .up"][1])
+
+        $(id +  " .down")[0].addEventListener("mousedown", direction_symbols[" .down"][0])
+        $(id +  " .down")[0].addEventListener("touchstart", direction_symbols[" .down"][0])
+        $(id +  " .down")[0].addEventListener("mouseup", direction_symbols[" .down"][1])
+        $(id +  " .down")[0].addEventListener("touchend", direction_symbols[" .down"][1])
+        $(id +  " .down")[0].addEventListener("dragleave", direction_symbols[" .down"][1])
+        
+        $(id +  " .right")[0].addEventListener("mousedown", direction_symbols[" .right"][0])
+        $(id +  " .right")[0].addEventListener("touchstart", direction_symbols[" .right"][0])
+        $(id +  " .right")[0].addEventListener("mouseup", direction_symbols[" .right"][1])
+        $(id +  " .right")[0].addEventListener("touchend", direction_symbols[" .right"][1])
+        $(id +  " .right")[0].addEventListener("dragleave", direction_symbols[" .right"][1])
+        
+        $(id +  " .left")[0].addEventListener("mousedown", direction_symbols[" .left"][0])
+        $(id +  " .left")[0].addEventListener("touchstart", direction_symbols[" .left"][0])
+        $(id +  " .left")[0].addEventListener("mouseup", direction_symbols[" .left"][1])
+        $(id +  " .left")[0].addEventListener("touchend", direction_symbols[" .left"][1])
+        $(id +  " .left")[0].addEventListener("dragleave", direction_symbols[" .left"][1])
+        $(id +  " .up").on('contextmenu',function(e){
+        return false;
+        });
+        $(id +  " .down").on('contextmenu',function(e){
+        return false;
+        });
+        $(id +  " .right").on('contextmenu',function(e){
+        return false;
+        });
+        $(id +  " .left").on('contextmenu',function(e){
+        return false;
+        });

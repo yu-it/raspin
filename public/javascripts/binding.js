@@ -89,7 +89,7 @@ function button_up_handler(id) {
     )
 }    
 function button_down_arrow_handler(id,dir) {
-    console.log("button_down")
+    console.log("button_down : " + id + " : " + dir)
     aplly_rules()
     $.ajax(
         {
